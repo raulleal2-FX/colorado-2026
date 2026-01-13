@@ -1,0 +1,2223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Colorado PRO+">
+    <title>Colorado Adventure 2026 PRO+ - José & Emma</title>
+    
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        * { font-family: 'Outfit', sans-serif; }
+        body { margin: 0; padding: 0; overflow-x: hidden; }
+        .hero-title {
+            font-family: 'Playfair Display', serif;
+            background: linear-gradient(135deg, #ffffff 0%, #60a5fa 50%, #93c5fd 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 3s infinite;
+            background-size: 200% 200%;
+        }
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        .mountain-icon { animation: float 4s ease-in-out infinite; }
+        .card-glow {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.6) 0%, rgba(30, 64, 175, 0.4) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(96, 165, 250, 0.3);
+            transition: all 0.3s ease;
+        }
+        .card-glow:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(96, 165, 250, 0.3);
+            border-color: rgba(96, 165, 250, 0.6);
+        }
+        .tab-button {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .tab-button::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%) scaleX(0);
+            width: 80%;
+            height: 3px;
+            background: linear-gradient(90deg, #60a5fa, #93c5fd);
+            transition: transform 0.3s ease;
+        }
+        .tab-button.active::after {
+            transform: translateX(-50%) scaleX(1);
+        }
+        .activity-item {
+            transition: all 0.2s ease;
+        }
+        .activity-item:hover {
+            transform: translateX(5px);
+        }
+        .snow-particle {
+            position: fixed;
+            background: white;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: snowfall linear infinite;
+            opacity: 0.6;
+            z-index: 0;
+        }
+        @keyframes snowfall {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        .progress-bar {
+            transition: width 0.5s ease;
+        }
+        @supports (padding: max(0px)) {
+            body {
+                padding-left: env(safe-area-inset-left);
+                padding-right: env(safe-area-inset-right);
+            }
+        }
+        .status-ontime { color: #10b981; }
+        .status-delayed { color: #f59e0b; }
+        .status-boarding { color: #3b82f6; }
+        .status-scheduled { color: #6b7280; }
+        .journal-entry {
+            border-left: 3px solid #60a5fa;
+            padding-left: 12px;
+        }
+        .photo-thumbnail {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .emotion-btn {
+            font-size: 2rem;
+            padding: 0.75rem;
+            border-radius: 50%;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .emotion-btn:hover {
+            transform: scale(1.2);
+            background: rgba(96, 165, 250, 0.2);
+        }
+        .emotion-btn.selected {
+            background: rgba(96, 165, 250, 0.4);
+            border-color: #60a5fa;
+            transform: scale(1.3);
+        }
+        .star-rating {
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #94a3b8;
+        }
+        .star-rating.filled {
+            color: #fbbf24;
+        }
+        .star-rating:hover {
+            transform: scale(1.1);
+        }
+        .recommendation-card {
+            background: rgba(30, 58, 138, 0.3);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            transition: all 0.3s;
+        }
+        .recommendation-card:hover {
+            background: rgba(30, 58, 138, 0.5);
+            border-color: rgba(96, 165, 250, 0.4);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function ColoradoAdventure() {
+            const [currentDay, setCurrentDay] = useState(1);
+            const [completedActivities, setCompletedActivities] = useState(new Set());
+            const [budget, setBudget] = useState({ spent: 0, total: 5000 });
+            const [expenses, setExpenses] = useState([]);
+            const [photos, setPhotos] = useState([]);
+            const [journal, setJournal] = useState({});
+            const [packingChecked, setPackingChecked] = useState(new Set());
+            const [activeTab, setActiveTab] = useState('itinerary');
+            const [showExpenseForm, setShowExpenseForm] = useState(false);
+            const [newExpense, setNewExpense] = useState({ amount: '', category: '', description: '' });
+            const [showJournalForm, setShowJournalForm] = useState(false);
+            const [newJournalEntry, setNewJournalEntry] = useState({
+                text: '',
+                emotion: '',
+                rating: 0,
+                highlight: '',
+                food: '',
+                learned: ''
+            });
+            const [showActivityForm, setShowActivityForm] = useState(false);
+            const [newActivity, setNewActivity] = useState({ name: '', emoji: '📍', priority: 'media', forEmma: false });
+            const [customActivities, setCustomActivities] = useState({});
+            const [documents, setDocuments] = useState([]);
+            const [showRecommendations, setShowRecommendations] = useState(false);
+            const [showLibrary, setShowLibrary] = useState(false);
+            const [checklistItems, setChecklistItems] = useState(new Set());
+
+            const [flightInfo] = useState({
+                outbound: { 
+                    number: 'Tu # vuelo', 
+                    airline: 'Aerolínea', 
+                    from: 'MEX',
+                    to: 'DEN',
+                    date: 'Ene 16', 
+                    time: '10:00 AM', 
+                    gate: 'A15', 
+                    status: 'On Time',
+                    terminal: '1'
+                },
+                return: { 
+                    number: 'Tu # vuelo', 
+                    airline: 'Aerolínea',
+                    from: 'DEN',
+                    to: 'MEX', 
+                    date: 'Ene 25', 
+                    time: '3:00 PM', 
+                    gate: 'B22', 
+                    status: 'Scheduled',
+                    terminal: '2'
+                }
+            });
+
+            const dailyQuotes = {
+                1: "✨ El viaje de mil millas comienza con un solo paso",
+                2: "🌍 La vida es corta y el mundo es ancho",
+                3: "💎 Colecciona momentos, no cosas",
+                4: "🏔️ La aventura te espera",
+                5: "❤️ Los mejores recuerdos se crean en familia",
+                6: "🎉 Cada día es una nueva aventura",
+                7: "📖 El mundo es un libro, y quienes no viajan solo leen una página",
+                8: "💰 Viajar es la única cosa que compras que te hace más rico",
+                9: "⭐ No cuentes los días, haz que los días cuenten",
+                10: "🏡 Los mejores viajes nunca terminan en el corazón"
+            };
+
+            const universalAffirmations = {
+                1: "Estoy creando recuerdos invaluables",
+                2: "Merezco disfrutar este momento plenamente",
+                3: "La abundancia fluye hacia mí en todas sus formas",
+                4: "Estoy presente, consciente y agradecido",
+                5: "Cada experiencia me hace más fuerte y sabio",
+                6: "Atraigo experiencias positivas a mi vida",
+                7: "Mi vida está llena de bendiciones infinitas",
+                8: "Confío en el proceso perfecto de la vida",
+                9: "Soy digno de todas las cosas buenas",
+                10: "Cierro este ciclo con gratitud profunda"
+            };
+
+            const brianTracyQuotes = [
+                "Nunca dejes que las pobres excusas arruinen un gran plan",
+                "El éxito es predecible y alcanzable si sigues las reglas",
+                "Tus creencias se convierten en tu realidad",
+                "La disciplina es hacer lo que sabes que debes hacer",
+                "Cada minuto en planificación ahorra diez en ejecución",
+                "Traga ese sapo: haz primero lo más difícil del día",
+                "Las metas son sueños con fechas límite",
+                "Eres lo que piensas la mayor parte del tiempo",
+                "No hay excusas: el poder de la autodisciplina"
+            ];
+
+            const dailyReadings = {
+                1: {
+                    book: "You Can Heal Your Life",
+                    author: "Louise Hay",
+                    emoji: "💖",
+                    theme: "El Poder del Amor Propio",
+                    reading: `El amor propio comienza con no criticarnos nunca por nada. La crítica nos encierra en el patrón que estamos tratando de cambiar. Entendimiento y amabilidad son las claves del cambio positivo.
+
+Recuerda: has estado criticándote durante años y no ha funcionado. Intenta aprobarte y ver qué sucede.
+
+En el infinito de la vida donde estoy, todo es perfecto, completo y entero. Soy uno con el poder que me creó. Estoy totalmente abierto y receptivo a la abundancia de vida que fluye hacia mí. Todos mis pensamientos contribuyen a mi bienestar.
+
+El pasado ya no tiene poder. Los pensamientos de este momento están creando mi futuro. Estoy protegido por el amor divino. Todo está bien en mi mundo.`,
+                    practice: "Hoy, cada vez que notes una autocrítica, detente y di: 'Te amo y te acepto exactamente como eres.' Hazlo frente al espejo al menos una vez."
+                },
+                2: {
+                    book: "Eat That Frog!",
+                    author: "Brian Tracy",
+                    emoji: "🐸",
+                    theme: "Prioridades y Productividad",
+                    reading: `Tu "sapo" es la tarea más grande e importante que tienes que hacer, aquella que probablemente postergarás si no tomas medidas inmediatamente.
+
+La primera regla del éxito es: ¡Trágate ese sapo! Si tienes que tragarte dos sapos, trágate el más feo primero. Si tienes que tragarte un sapo, no te quedes mirándolo durante mucho tiempo.
+
+La clave para alcanzar altos niveles de desempeño y productividad es desarrollar el hábito de atacar tu tarea principal antes que nada cada mañana. Debes desarrollar el hábito de comenzar tu tarea más importante antes de hacer cualquier otra cosa.
+
+Tu capacidad para seleccionar tu tarea más importante, iniciarla y luego concentrarte en ella hasta completarla al 100% es la clave del éxito personal.`,
+                    practice: "Mañana, identifica tu 'sapo' más importante del día. Hazlo PRIMERO, antes del desayuno, antes del email, antes de todo."
+                },
+                3: {
+                    book: "The Power of Positive Thinking",
+                    author: "Norman Vincent Peale",
+                    emoji: "✨",
+                    theme: "La Fe Mueve Montañas",
+                    reading: `Cree que puedes y ya estás a medio camino. Una actitud mental positiva y confiada no solo crea el éxito, sino que atrae el éxito.
+
+El problema con la mayoría de las personas es que piensan más en lo que no quieren que en lo que sí quieren. En lugar de pensar en lo que no tienes o en tus problemas, piensa en lo que deseas y en las soluciones.
+
+Formula tus pensamientos en términos positivos. No digas "no puedo", di "puedo". No digas "es difícil", di "puedo manejarlo". Tus palabras tienen poder creativo tremendo.
+
+La fe es el ingrediente más importante para el éxito. Si crees que algo puede hacerse, tu mente encontrará la manera. Cuando enfrentes desafíos, di firmemente: "Con la ayuda de Dios, puedo manejar esto."`,
+                    practice: "Durante este viaje, cada vez que surja un pensamiento negativo, reemplázalo conscientemente con su opuesto positivo. Hazlo 10 veces hoy."
+                },
+                4: {
+                    book: "Maximum Achievement",
+                    author: "Brian Tracy",
+                    emoji: "🏆",
+                    theme: "La Ley de la Creencia",
+                    reading: `Tu creencia más profunda se convierte en tu realidad. Lo que crees con convicción, se convierte en tu propia profecía autocumplida.
+
+Tienes el control completo sobre una sola cosa en el universo: tu pensamiento. Y tu pensamiento es el punto de inicio de todo lo que logras o dejas de lograr.
+
+Los ganadores en la vida son aquellos que han desarrollado el hábito mental de pensar solo en lo que quieren y rehúsan pensar en lo que no quieren. Concentran sus energías mentales en las metas que desean alcanzar.
+
+El éxito no es un accidente. Es el resultado de una actitud mental positiva y del desarrollo sistemático de hábitos de pensamiento que llevan al logro.
+
+Tus creencias determinan tus expectativas, y tus expectativas determinan tu actitud. Tu actitud determina tu comportamiento, y tu comportamiento determina tus resultados.`,
+                    practice: "Escribe 3 creencias limitantes que tienes. Ahora reescríbelas como creencias empoderadoras. Léelas en voz alta cada mañana."
+                },
+                5: {
+                    book: "The Secret",
+                    author: "Rhonda Byrne",
+                    emoji: "🔮",
+                    theme: "La Ley de Atracción",
+                    reading: `Eres un imán viviente. Atraes inevitablemente hacia tu vida las personas, circunstancias y eventos que están en armonía con tus pensamientos dominantes.
+
+Tus pensamientos se convierten en cosas. Si ves eso en tu mente, lo tendrás en tu mano. Todo lo que quieres ya existe en forma invisible. Tu trabajo es usar el poder de tu mente para hacerlo visible.
+
+El proceso de creación tiene tres pasos: Pide, Cree, Recibe. Pide claramente lo que quieres. Cree que ya lo tienes. Recíbelo con gratitud.
+
+La gratitud es absolutamente crítica. Cuando estés agradecido por lo que tienes, atraerás más cosas por las cuales estar agradecido. La gratitud te conecta con la fuente de toda abundancia.`,
+                    practice: "Esta noche, escribe 10 cosas por las que estás agradecido en este viaje. Siéntelas profundamente. Haz esto cada noche."
+                },
+                6: {
+                    book: "Goals!",
+                    author: "Brian Tracy",
+                    emoji: "🎯",
+                    theme: "El Poder de las Metas Claras",
+                    reading: `Solo el 3% de los adultos tienen metas escritas claras, y logran más en un año que el 97% logra en toda su vida. La razón es simple: claridad mental.
+
+Una meta sin fecha límite es solo un deseo. Una meta escrita con fecha límite se convierte en un plan. Un plan respaldado por acción se convierte en realidad.
+
+Las metas te dan dirección y propósito. Te permiten concentrar tu tiempo y energía en lo que realmente importa. Sin metas, estás a la deriva, reaccionando a las circunstancias en lugar de crearlas.
+
+Escribe tus metas en tiempo presente, como si ya las hubieras logrado. No escribas "Quiero tener", escribe "Tengo". No escribas "Voy a ser", escribe "Soy". Tu mente subconsciente no distingue entre realidad e imaginación vívidamente representada.`,
+                    practice: "Escribe 3 metas para los próximos 90 días en tiempo presente. Léelas cada mañana y cada noche. Visualízalas como si ya fueran reales."
+                },
+                7: {
+                    book: "No Excuses!",
+                    author: "Brian Tracy",
+                    emoji: "💪",
+                    theme: "El Poder de la Autodisciplina",
+                    reading: `La autodisciplina es la clave del éxito. Es la capacidad de hacer lo que debes hacer, cuando debes hacerlo, te guste o no.
+
+Cada vez que te disciplinas para hacer lo que sabes que debes hacer, tu autoestima aumenta. Cada vez que cedes a tus impulsos o te permites postergar, tu autoestima disminuye.
+
+La buena noticia es que la autodisciplina es un hábito que se puede aprender. Se fortalece con cada pequeña victoria. Comienza con decisiones pequeñas: levantarte a tiempo, hacer ejercicio, comer sano. Estas victorias tempranas construyen tu músculo de disciplina.
+
+El éxito requiere sacrificio. Pero el sacrificio que haces hoy construye la libertad que disfrutarás mañana. No hay atajos. No hay excusas.`,
+                    practice: "Hoy, identifica UNA cosa que has estado posponiendo. Hazla. Complétala. Sin excusas. Siente la victoria."
+                },
+                8: {
+                    book: "The Power of Now",
+                    author: "Eckhart Tolle",
+                    emoji: "🧘",
+                    theme: "Vivir en el Presente",
+                    reading: `Nada existe excepto el Ahora. El pasado es un recuerdo almacenado en la mente. El futuro es una proyección imaginada. Lo único real es este momento presente.
+
+La mayoría de las personas nunca están presentes. Están siempre preocupadas por el pasado o ansiosas por el futuro. En consecuencia, se pierden la única vida que realmente tienen: la que está sucediendo ahora mismo.
+
+El poder, la alegría, la creatividad y el amor verdadero solo existen en el momento presente. Cuando estás completamente presente, el tiempo parece detenerse. Experimentas paz profunda.
+
+En este viaje con tu familia, practica estar completamente presente. Cuando estés con ellos, ESTÁ con ellos. No en tu teléfono, no en tu mente, sino aquí, ahora, experimentando este momento que nunca volverá.`,
+                    practice: "Durante las comidas familiares hoy, guarda el teléfono. Mira a los ojos. Escucha completamente. Está 100% presente."
+                },
+                9: {
+                    book: "Think and Grow Rich",
+                    author: "Napoleon Hill",
+                    emoji: "💎",
+                    theme: "El Poder del Deseo Ardiente",
+                    reading: `El punto de partida de todo logro es el DESEO. Los deseos débiles traen resultados débiles. Debes querer algo con tal intensidad que todo tu ser se enfoque en obtenerlo.
+
+Hay una diferencia entre desear algo y estar LISTO para recibirlo. Si estás listo, lo tendrás. Estar listo significa estar dispuesto a dar algo a cambio. No hay algo como "obtener algo por nada".
+
+Los hombres exitosos toman decisiones rápidamente y las cambian lentamente. Las personas sin éxito toman decisiones lentamente y las cambian con frecuencia. Una vez que decides, comprométete totalmente.
+
+El éxito requiere seis pasos: 1) Fija la cantidad exacta que deseas. 2) Determina exactamente qué darás a cambio. 3) Establece una fecha límite. 4) Crea un plan. 5) Escríbelo todo. 6) Lee tu declaración en voz alta dos veces al día.`,
+                    practice: "Escribe UN deseo ardiente que tengas. Sé específico. Establece fecha límite. Comprométete hoy a dar un paso hacia él."
+                },
+                10: {
+                    book: "The 7 Habits of Highly Effective People",
+                    author: "Stephen Covey",
+                    emoji: "🌟",
+                    theme: "Comenzar con el Fin en Mente",
+                    reading: `Comenzar con el fin en mente significa iniciar cada día, tarea o proyecto con una visión clara de tu destino deseado, y luego continuar flexionando tus músculos proactivos para hacer que las cosas sucedan.
+
+Uno de los mejores ejercicios para aplicar este hábito es escribir tu propio obituario. ¿Qué quieres que se diga de ti? ¿Qué legado quieres dejar? ¿Cómo quieres ser recordado?
+
+Este viaje a Colorado, por ejemplo, ¿cuál es el fin en mente? No es solo "ir a esquiar". Es crear recuerdos invaluables con tu familia. Es mostrarle a tu hija el mundo. Es fortalecer vínculos. Es honrar la memoria de tu madre.
+
+Cuando tienes claro el fin en mente, cada decisión se vuelve fácil. ¿Esta acción me acerca o me aleja de mi visión? Esa simple pregunta elimina la confusión.
+
+Al final de este viaje, ¿cómo quieres sentirte? ¿Qué quieres que tu familia recuerde? Decide ahora, y luego actúa en consecuencia.`,
+                    practice: "Esta noche, visualiza el último día del viaje. ¿Cómo quieres sentirte? ¿Qué quieres haber logrado? Trabaja hacia atrás desde ahí."
+                }
+            };
+
+            const wazeLocations = [
+                { name: "🛬 Aeropuerto Denver (DIA)", waze: "waze://?ll=39.8561,-104.6737&navigate=yes", gmaps: "https://maps.google.com/?q=Denver+International+Airport", type: "aeropuerto" },
+                { name: "🏨 Vail Village", waze: "waze://?q=vail+village+colorado&navigate=yes", gmaps: "https://maps.google.com/?q=vail+village+colorado", type: "hotel" },
+                { name: "♨️ Glenwood Hot Springs", waze: "waze://?ll=39.5506,-107.3253&navigate=yes", gmaps: "https://maps.google.com/?q=Glenwood+Hot+Springs+Pool", type: "atraccion" },
+                { name: "🚡 Glenwood Caverns", waze: "waze://?ll=39.5444,-107.3339&navigate=yes", gmaps: "https://maps.google.com/?q=Glenwood+Caverns+Adventure+Park", type: "atraccion" },
+                { name: "🌄 Maroon Bells (Aspen)", waze: "waze://?ll=39.0711,-106.9890&navigate=yes", gmaps: "https://maps.google.com/?q=Maroon+Bells+Aspen", type: "atraccion" },
+                { name: "⛷️ Vail Mountain Resort", waze: "waze://?ll=39.6403,-106.3742&navigate=yes", gmaps: "https://maps.google.com/?q=Vail+Mountain+Resort", type: "ski" },
+                { name: "🏥 Vail Health Hospital", waze: "waze://?ll=39.6389,-106.3644&navigate=yes", gmaps: "https://maps.google.com/?q=Vail+Health+Hospital", type: "emergencia" },
+                { name: "🏥 Aspen Valley Hospital", waze: "waze://?ll=39.1955,-106.8256&navigate=yes", gmaps: "https://maps.google.com/?q=Aspen+Valley+Hospital", type: "emergencia" }
+            ];
+
+            const preTripChecklist = [
+                { id: 'c1', task: '✈️ Check-in online 24hrs antes', priority: 'alta', days: 1 },
+                { id: 'c2', task: '🏨 Confirmar reservas de hoteles', priority: 'alta', days: 3 },
+                { id: 'c3', task: '🎿 Reservar equipo de esquí', priority: 'media', days: 5 },
+                { id: 'c4', task: '💳 Avisar al banco del viaje', priority: 'alta', days: 7 },
+                { id: 'c5', task: '🚗 Confirmar renta de auto', priority: 'alta', days: 3 },
+                { id: 'c6', task: '📱 Descargar mapas offline', priority: 'media', days: 2 },
+                { id: 'c7', task: '💊 Medicinas para altitud', priority: 'alta', days: 5 },
+                { id: 'c8', task: '📄 Imprimir confirmaciones', priority: 'media', days: 2 },
+                { id: 'c9', task: '🪪 Verificar pasaportes', priority: 'alta', days: 7 },
+                { id: 'c10', task: '🧳 Empacar maletas', priority: 'alta', days: 1 }
+            ];
+
+            const extraRecommendations = {
+                1: [
+                    { name: '🍽️ Mercantile Dining', category: 'Restaurante', desc: 'Farm-to-table en Union Station', cost: '$$$' },
+                    { name: '🎨 RiNo Art District', category: 'Paseo', desc: 'Murales y galerías de arte', cost: 'Gratis' },
+                    { name: '🍺 Great Divide Brewery', category: 'Adultos', desc: 'Cervecería local famosa', cost: '$$' },
+                    { name: '🌆 Confluence Park', category: 'Familia', desc: 'Parque junto al río', cost: 'Gratis' },
+                    { name: '📚 Tattered Cover', category: 'Shopping', desc: 'Librería icónica', cost: '$' }
+                ],
+                2: [
+                    { name: '🍕 Beau Jo\'s Pizza', category: 'Restaurante', desc: 'Pizza estilo Colorado (Idaho Springs)', cost: '$$' },
+                    { name: '🏛️ Georgetown Loop Railroad', category: 'Familia', desc: 'Tren histórico minero', cost: '$$$' },
+                    { name: '🎭 Vail International Dance Festival', category: 'Cultura', desc: 'Si hay shows', cost: '$$$' },
+                    { name: '🌲 Betty Ford Alpine Gardens', category: 'Paseo', desc: 'Jardines alpinos', cost: 'Gratis' },
+                    { name: '🍔 The George', category: 'Restaurante', desc: 'Burgers gourmet en Vail Village', cost: '$$$' }
+                ],
+                3: [
+                    { name: '🍽️ Sweet Basil', category: 'Restaurante', desc: 'Fine dining en Vail', cost: '$$$$' },
+                    { name: '🏔️ Epic Discovery', category: 'Familia', desc: 'Actividades de verano en la montaña', cost: '$$$' },
+                    { name: '🎿 Ski Lessons privadas', category: 'Esquí', desc: 'Para Emma (más personalizado)', cost: '$$$$' },
+                    { name: '☕ The Little Diner', category: 'Desayuno', desc: 'Desayunos legendarios', cost: '$$' },
+                    { name: '🧖 Aria Spa', category: 'Relax', desc: 'Spa en Vail Cascade', cost: '$$$$' }
+                ],
+                4: [
+                    { name: '🍝 Larkspur', category: 'Restaurante', desc: 'Fine dining en Vail', cost: '$$$$' },
+                    { name: '🎢 Adventure Ridge', category: 'Familia', desc: 'Tubing y actividades nocturnas', cost: '$$$' },
+                    { name: '🏂 Snowboarding lesson', category: 'Esquí', desc: 'Probar snowboard', cost: '$$$' },
+                    { name: '🍺 Loaded Joe\'s', category: 'Après-ski', desc: 'Bar animado post-esquí', cost: '$$' },
+                    { name: '📸 Ford Park', category: 'Fotos', desc: 'Mejores vistas de Vail', cost: 'Gratis' }
+                ],
+                5: [
+                    { name: '🍽️ Glenwood Canyon Brewpub', category: 'Restaurante', desc: 'Cerveza artesanal local', cost: '$$' },
+                    { name: '♨️ Yampah Spa', category: 'Relax', desc: 'Vapor caves naturales', cost: '$$$' },
+                    { name: '🌊 Hanging Lake', category: 'Hiking', desc: 'Caminata icónica (requiere permiso)', cost: '$$' },
+                    { name: '🎭 Glenwood Vaudeville Revue', category: 'Show', desc: 'Comedia y música', cost: '$$' },
+                    { name: '🍦 The Pullman', category: 'Postre', desc: 'Helados artesanales', cost: '$' }
+                ],
+                6: [
+                    { name: '🏔️ Haunted Mine Drop', category: 'Aventura', desc: 'Caída libre en Caverns', cost: '$$' },
+                    { name: '🎢 Cliffhanger Roller Coaster', category: 'Familia', desc: 'Montaña rusa única', cost: '$$' },
+                    { name: '🍕 Slope & Hatch', category: 'Restaurante', desc: 'Pizza y drinks', cost: '$$' },
+                    { name: '📸 Lookout Mountain', category: 'Fotos', desc: 'Vistas panorámicas', cost: 'Gratis' },
+                    { name: '🏊 Iron Mountain Hot Springs', category: 'Relax', desc: 'Más pequeño que Glenwood pero bonito', cost: '$$$' }
+                ],
+                7: [
+                    { name: '🌄 Sunrise en Maroon Lake', category: 'Fotos', desc: 'IMPERDIBLE - llegar 6:30am', cost: 'Gratis' },
+                    { name: '🍽️ Ajax Tavern', category: 'Restaurante', desc: 'Legendario en Aspen', cost: '$$$$' },
+                    { name: '🎭 Wheeler Opera House', category: 'Cultura', desc: 'Teatro histórico', cost: '$$$' },
+                    { name: '🛍️ Aspen Saturday Market', category: 'Shopping', desc: 'Mercado local (sábados)', cost: '$' },
+                    { name: '☕ Paradise Bakery', category: 'Café', desc: 'Desayuno favorito de locales', cost: '$$' }
+                ],
+                8: [
+                    { name: '🏞️ Grizzly Creek Rest Area', category: 'Paseo', desc: 'Parada escénica en Glenwood Canyon', cost: 'Gratis' },
+                    { name: '🍔 Root Down', category: 'Restaurante', desc: 'Farm-to-table en Denver', cost: '$$$' },
+                    { name: '🎵 Red Rocks Park', category: 'Paseo', desc: 'Anfiteatro icónico', cost: 'Gratis' },
+                    { name: '🏔️ Morrison', category: 'Pueblo', desc: 'Pueblo pintoresco', cost: 'Gratis' },
+                    { name: '🍻 Wynkoop Brewing', category: 'Adultos', desc: 'Primera cervecería de Denver', cost: '$$' }
+                ],
+                9: [
+                    { name: '🦕 Fossil Trace Golf Club', category: 'Golf', desc: 'Campo con fósiles reales', cost: '$$$$' },
+                    { name: '🍽️ Ophelia\'s Electric Soapbox', category: 'Restaurante', desc: 'Music venue + comida', cost: '$$$' },
+                    { name: '🎨 Santa Fe Art District', category: 'Arte', desc: 'Galerías y murales', cost: 'Gratis' },
+                    { name: '🏀 Denver Nuggets game', category: 'Deportes', desc: 'Si hay juego', cost: '$$$$' },
+                    { name: '🍰 Voodoo Doughnut', category: 'Postre', desc: 'Donas famosas', cost: '$' }
+                ],
+                10: [
+                    { name: '☕ Snooze AM Eatery', category: 'Desayuno', desc: 'Último brunch épico', cost: '$$' },
+                    { name: '🛍️ Cherry Creek Mall', category: 'Shopping', desc: 'Last minute souvenirs', cost: '$$$' },
+                    { name: '🎁 I Heart Denver Store', category: 'Souvenirs', desc: 'Souvenirs locales', cost: '$$' },
+                    { name: '📸 Civic Center Park', category: 'Fotos', desc: 'Últimas fotos con Capitol', cost: 'Gratis' },
+                    { name: '🍽️ Guard and Grace', category: 'Restaurante', desc: 'Cena de despedida steakhouse', cost: '$$$$' }
+                ]
+            };
+
+            const events = [
+                {
+                    name: '🎪 National Western Stock Show',
+                    location: 'Denver',
+                    date: 'Ene 11-26',
+                    description: 'El rodeo más grande de Colorado! Cowboys, ganado, shows.',
+                    priority: 'Alta',
+                    url: 'nationalwestern.com'
+                },
+                {
+                    name: '🎵 Palm Tree Music Festival',
+                    location: 'Aspen',
+                    date: 'Ene 23-25',
+                    description: 'Festival de música en Rio Grande Park - ¡Justo en tus fechas!',
+                    priority: 'CRÍTICO',
+                    url: 'palmtreemusicfestival.com'
+                },
+                {
+                    name: '🎿 X Games Aspen',
+                    location: 'Aspen - Buttermilk',
+                    date: 'Ene 17-19',
+                    description: 'Deportes extremos de nieve - snowboard, ski, freestyle',
+                    priority: 'Alta',
+                    url: 'xgames.com'
+                },
+                {
+                    name: '💡 Light the Lights',
+                    location: 'Denver City & County Building',
+                    date: 'Hasta Ene 25',
+                    description: 'Show de luces gratis (5:45 y 6:45 PM)',
+                    priority: 'Media',
+                    url: 'denver.org'
+                },
+                {
+                    name: '🎨 Denver Art Museum - Free Day',
+                    location: 'Denver',
+                    date: 'Ene 13',
+                    description: 'Entrada GRATIS al museo',
+                    priority: 'Media',
+                    url: 'denverartmuseum.org'
+                },
+                {
+                    name: '🦁 Denver Zoo - Free Day',
+                    location: 'Denver',
+                    date: 'Ene 9 (requiere reserva)',
+                    description: 'Entrada gratis (necesitas reservar antes)',
+                    priority: 'Baja',
+                    url: 'denverzoo.org'
+                }
+            ];
+
+            const denverActivities = [
+                {
+                    name: '🏔️ 16th Street Mall',
+                    description: 'Calle peatonal con tiendas, restaurantes, entretenimiento',
+                    category: 'Shopping',
+                    forEmma: true,
+                    cost: 'Gratis'
+                },
+                {
+                    name: '🦕 Denver Museum of Nature & Science',
+                    description: 'Dinosaurios, planetario, IMAX. ¡Emma lo AMARÁ!',
+                    category: 'Museos',
+                    forEmma: true,
+                    cost: '$20-25'
+                },
+                {
+                    name: '🦁 Denver Zoo',
+                    description: 'Uno de los mejores zoos de USA. 4,000 animales',
+                    category: 'Familia',
+                    forEmma: true,
+                    cost: '$20-22'
+                },
+                {
+                    name: '🎨 Denver Art Museum',
+                    description: 'Arquitectura increíble + arte mundial',
+                    category: 'Museos',
+                    forEmma: false,
+                    cost: '$15-18'
+                },
+                {
+                    name: '🏛️ Colorado State Capitol',
+                    description: 'Tour gratis. Mile High Step (escalón a 1 milla de altura)',
+                    category: 'Tours',
+                    forEmma: false,
+                    cost: 'Gratis'
+                },
+                {
+                    name: '🍺 Brewery Tours',
+                    description: 'Denver tiene MÁS cervecerías que cualquier ciudad USA',
+                    category: 'Adultos',
+                    forEmma: false,
+                    cost: '$15-30'
+                },
+                {
+                    name: '🌆 Union Station',
+                    description: 'Estación histórica con restaurantes y tiendas',
+                    category: 'Arquitectura',
+                    forEmma: true,
+                    cost: 'Gratis'
+                },
+                {
+                    name: '🎭 Meow Wolf Denver',
+                    description: 'Arte inmersivo/interactivo. Experiencia ÚNICA',
+                    category: 'Arte',
+                    forEmma: true,
+                    cost: '$35-45'
+                },
+                {
+                    name: '🏈 Denver Downtown Aquarium',
+                    description: 'Acuario con +500 especies + restaurante bajo el agua',
+                    category: 'Familia',
+                    forEmma: true,
+                    cost: '$22-28'
+                },
+                {
+                    name: '⚾ Coors Field Tour',
+                    description: 'Tour del estadio de los Colorado Rockies',
+                    category: 'Deportes',
+                    forEmma: false,
+                    cost: '$12-15'
+                }
+            ];
+
+            const tripDays = [
+                {
+                    day: 1,
+                    date: 'Vie 16 Enero',
+                    location: 'Denver (Llegada + Rodeo)',
+                    weatherLocation: 'Denver,CO',
+                    activities: [
+                        { id: '1-1', name: '✈️ Llegada 11:00 AM al aeropuerto DIA', emoji: '✈️', priority: 'alta', forEmma: true },
+                        { id: '1-2', name: '12:30-1:30 PM: Renta de auto + salida aeropuerto', emoji: '🚗', priority: 'alta', forEmma: false },
+                        { id: '1-3', name: '1:30-3:00 PM: Costco (comida de vacaciones)', emoji: '🛒', priority: 'alta', forEmma: false },
+                        { id: '1-4', name: '3:30 PM: Check-in Airbnb Denver', emoji: '🏠', priority: 'alta', forEmma: false },
+                        { id: '1-5', name: '4:30-6:15 PM: 16th Street + Union Station', emoji: '🛍️', priority: 'media', forEmma: true },
+                        { id: '1-6', name: '6:15-7:00 PM: Cena ligera cerca', emoji: '🍽️', priority: 'media', forEmma: true },
+                        { id: '1-7', name: '7:30-9:30 PM: Rodeo / Stock Show 🤠', emoji: '🐴', priority: 'alta', forEmma: true },
+                        { id: '1-8', name: '10:30 PM: Dormir + mucha agua', emoji: '💤', priority: 'alta', forEmma: true }
+                    ],
+                    weather: { temp: '2°C', condition: 'Despejado', snowQuality: 'N/A' }
+                },
+                {
+                    day: 2,
+                    date: 'Sáb 17 Enero',
+                    location: 'Denver → Breckenridge → Vail',
+                    weatherLocation: 'Breckenridge,CO',
+                    activities: [
+                        { id: '2-1', name: '8:00-8:30 AM: Salida de Denver', emoji: '🚗', priority: 'alta', forEmma: false },
+                        { id: '2-2', name: '10:30 AM: Llegada Breckenridge Nordic Center', emoji: '🏔️', priority: 'alta', forEmma: true },
+                        { id: '2-3', name: '10:45-1:00 PM: Nórdico / snowshoe tranquilo', emoji: '🎿', priority: 'alta', forEmma: true },
+                        { id: '2-4', name: '1:00-2:00 PM: Comida caliente en Breck', emoji: '🍲', priority: 'media', forEmma: true },
+                        { id: '2-5', name: '2:00-4:00 PM: Paseo por Breckenridge downtown', emoji: '🏘️', priority: 'media', forEmma: true },
+                        { id: '2-6', name: '4:30-6:00 PM: Manejo a Vail + check-in', emoji: '🏨', priority: 'alta', forEmma: false }
+                    ],
+                    weather: { temp: '-6°C', condition: 'Parcialmente nublado', snowQuality: 'Excelente' }
+                },
+                {
+                    day: 3,
+                    date: 'Dom 18 Enero',
+                    location: 'Vail (Día flexible nieve)',
+                    weatherLocation: 'Vail,CO',
+                    activities: [
+                        { id: '3-1', name: 'PLAN A: Eagle-Vail sledding hill + juegos', emoji: '🛷', priority: 'alta', forEmma: true },
+                        { id: '3-2', name: 'Vail Village + chocolate caliente + paseo', emoji: '☕', priority: 'alta', forEmma: true },
+                        { id: '3-3', name: 'Opcional: góndola peatonal / patinaje', emoji: '⛸️', priority: 'baja', forEmma: true },
+                        { id: '3-4', name: 'PLAN B: Frisco Adventure Park (tubing)', emoji: '🎢', priority: 'media', forEmma: true },
+                        { id: '3-5', name: 'O Keystone tubing (alternativa)', emoji: '🏔️', priority: 'media', forEmma: true },
+                        { id: '3-6', name: 'Regreso temprano a Vail para dormir bien', emoji: '😴', priority: 'alta', forEmma: true }
+                    ],
+                    weather: { temp: '-7°C', condition: 'Nevado ligero', snowQuality: 'Powder perfecto' }
+                },
+                {
+                    day: 4,
+                    date: 'Lun 19 Enero',
+                    location: 'Keystone (Clase privada 4 hrs)',
+                    weatherLocation: 'Keystone,CO',
+                    activities: [
+                        { id: '4-1', name: '8:30 AM: Salida de Vail', emoji: '🚗', priority: 'alta', forEmma: false },
+                        { id: '4-2', name: '9:45 AM: Llegada a Keystone', emoji: '⛷️', priority: 'alta', forEmma: true },
+                        { id: '4-3', name: '9:45-10:45 AM: Renta equipo + ajustes', emoji: '🎿', priority: 'alta', forEmma: true },
+                        { id: '4-4', name: '11:00 AM-3:00 PM: CLASE PRIVADA', emoji: '👨‍🏫', priority: 'alta', forEmma: true },
+                        { id: '4-5', name: '3:00-4:00 PM: Una hora pistas (opcional)', emoji: '🏂', priority: 'baja', forEmma: false },
+                        { id: '4-6', name: '4:00 PM: Cierre + fotos', emoji: '📸', priority: 'media', forEmma: true },
+                        { id: '4-7', name: '5:30-8:00 PM: Après-ski en Vail', emoji: '🍫', priority: 'media', forEmma: true }
+                    ],
+                    weather: { temp: '-8°C', condition: 'Soleado', snowQuality: 'Excelente' }
+                },
+                {
+                    day: 5,
+                    date: 'Mar 20 Enero',
+                    location: 'Beaver Creek (día lindo y familiar)',
+                    weatherLocation: 'Beaver+Creek,CO',
+                    activities: [
+                        { id: '5-1', name: 'Mañana: Beaver Creek Village + paseo', emoji: '🏘️', priority: 'alta', forEmma: true },
+                        { id: '5-2', name: 'Mediodía: Góndola peatonal / miradores', emoji: '🚡', priority: 'alta', forEmma: true },
+                        { id: '5-3', name: 'Caminata suave por el pueblo', emoji: '🚶', priority: 'media', forEmma: true },
+                        { id: '5-4', name: '3:00 PM: Cookie Time (galletas gratis!)', emoji: '🍪', priority: 'alta', forEmma: true },
+                        { id: '5-5', name: 'Tarde: Ice rink (opcional)', emoji: '⛸️', priority: 'baja', forEmma: true },
+                        { id: '5-6', name: 'Cena tranquila en Beaver Creek', emoji: '🍽️', priority: 'media', forEmma: true }
+                    ],
+                    weather: { temp: '-4°C', condition: 'Despejado', snowQuality: 'N/A' }
+                },
+                {
+                    day: 6,
+                    date: 'Mié 21 Enero',
+                    location: 'Glenwood Springs (recuperación total)',
+                    weatherLocation: 'Glenwood+Springs,CO',
+                    activities: [
+                        { id: '6-1', name: 'Mañana: Viaje Vail → Glenwood (sin prisas)', emoji: '🚗', priority: 'alta', forEmma: true },
+                        { id: '6-2', name: 'Check-in hotel Glenwood Springs', emoji: '🏨', priority: 'alta', forEmma: false },
+                        { id: '6-3', name: 'Mediodía/tarde: HOT SPRINGS POOL ♨️', emoji: '♨️', priority: 'alta', forEmma: true },
+                        { id: '6-4', name: 'O Iron Mountain Hot Springs', emoji: '🏊', priority: 'alta', forEmma: true },
+                        { id: '6-5', name: 'Relajar el cuerpo (objetivo recuperación)', emoji: '😌', priority: 'alta', forEmma: true },
+                        { id: '6-6', name: 'Atardecer: Paseo por río + pueblito', emoji: '🌅', priority: 'media', forEmma: true },
+                        { id: '6-7', name: 'Cena tranquila y descanso', emoji: '🍽️', priority: 'media', forEmma: true }
+                    ],
+                    weather: { temp: '-5°C', condition: 'Soleado', snowQuality: 'N/A' }
+                },
+                {
+                    day: 7,
+                    date: 'Jue 22 Enero',
+                    location: 'Glenwood (aventura suave + aguas)',
+                    weatherLocation: 'Glenwood+Springs,CO',
+                    activities: [
+                        { id: '7-1', name: 'Mañana: GLENWOOD CAVERNS ADVENTURE PARK', emoji: '🚡', priority: 'alta', forEmma: true },
+                        { id: '7-2', name: 'Tour de cuevas (Fairy Cave)', emoji: '🕳️', priority: 'alta', forEmma: true },
+                        { id: '7-3', name: 'Alpine Coaster (montaña rusa alpina)', emoji: '🎢', priority: 'alta', forEmma: true },
+                        { id: '7-4', name: 'Rides y atracciones del parque', emoji: '🎡', priority: 'media', forEmma: true },
+                        { id: '7-5', name: 'Tarde: Hot Springs SEGUNDA SESIÓN (la mejor)', emoji: '♨️', priority: 'alta', forEmma: true },
+                        { id: '7-6', name: 'Noche: Descanso temprano (carretera mañana)', emoji: '💤', priority: 'alta', forEmma: true }
+                    ],
+                    weather: { temp: '-10°C', condition: 'Muy frío pero despejado', snowQuality: 'N/A' }
+                },
+                {
+                    day: 8,
+                    date: 'Vie 23 Enero',
+                    location: 'Glenwood → Denver',
+                    weatherLocation: 'Denver,CO',
+                    activities: [
+                        { id: '8-1', name: 'Mañana: Check-out Glenwood Springs', emoji: '🏨', priority: 'alta', forEmma: false },
+                        { id: '8-2', name: 'Viaje a Denver (2.5-3 hrs por I-70)', emoji: '🚗', priority: 'alta', forEmma: true },
+                        { id: '8-3', name: 'Check-in hotel Denver', emoji: '🏨', priority: 'alta', forEmma: false },
+                        { id: '8-4', name: 'Tarde: Denver Botanic Gardens (invernaderos)', emoji: '🌺', priority: 'media', forEmma: true },
+                        { id: '8-5', name: 'O Denver Museum of Nature & Science', emoji: '🦖', priority: 'media', forEmma: true },
+                        { id: '8-6', name: 'Noche: Cherry Creek (cena + paseo)', emoji: '🍽️', priority: 'media', forEmma: true }
+                    ],
+                    weather: { temp: '3°C', condition: 'Despejado', snowQuality: 'N/A' }
+                },
+                {
+                    day: 9,
+                    date: 'Sáb 24 Enero',
+                    location: 'Denver (día fuerte distinto)',
+                    weatherLocation: 'Denver,CO',
+                    activities: [
+                        { id: '9-1', name: 'Denver Museum of Nature & Science', emoji: '🦖', priority: 'alta', forEmma: true },
+                        { id: '9-2', name: 'O Denver Zoo (si hace buen clima)', emoji: '🦁', priority: 'alta', forEmma: true },
+                        { id: '9-3', name: 'Almuerzo en Cherry Creek', emoji: '🍔', priority: 'media', forEmma: true },
+                        { id: '9-4', name: 'Compras finales: Cherry Creek Mall', emoji: '🛍️', priority: 'media', forEmma: true },
+                        { id: '9-5', name: 'Compras de souvenirs', emoji: '🎁', priority: 'media', forEmma: true },
+                        { id: '9-6', name: 'CENA DE DESPEDIDA (especial)', emoji: '🎉', priority: 'alta', forEmma: true },
+                        { id: '9-7', name: 'Empacar para vuelo de regreso', emoji: '🧳', priority: 'alta', forEmma: false }
+                    ],
+                    weather: { temp: '4°C', condition: 'Soleado', snowQuality: 'N/A' }
+                },
+                {
+                    day: 10,
+                    date: 'Dom 25 Enero',
+                    location: 'Regreso a México',
+                    weatherLocation: 'Denver,CO',
+                    activities: [
+                        { id: '10-1', name: 'Vuelo 12:00 PM', emoji: '✈️', priority: 'alta', forEmma: true },
+                        { id: '10-2', name: '8:00-8:30 AM: Salida al aeropuerto', emoji: '🚗', priority: 'alta', forEmma: false },
+                        { id: '10-3', name: '9:00 AM: Llegar a DIA (internacional)', emoji: '🛫', priority: 'alta', forEmma: false },
+                        { id: '10-4', name: 'Check-in y seguridad (sin estrés)', emoji: '🎫', priority: 'alta', forEmma: true },
+                        { id: '10-5', name: 'Vuelo a casa con recuerdos ÉPICOS', emoji: '🏠', priority: 'alta', forEmma: true },
+                        { id: '10-6', name: 'Reflexionar sobre aventura increíble', emoji: '❤️', priority: 'alta', forEmma: true },
+                        { id: '10-7', name: 'Sueño cumplido - en honor a mamá 🌟', emoji: '🌟', priority: 'alta', forEmma: true }
+                    ],
+                    weather: { temp: 'Variable', condition: 'En viaje', snowQuality: 'N/A' }
+                }
+            ];
+
+            const mustDoActivities = [
+                { name: 'Glenwood Hot Springs Pool (mundo)', icon: '♨️', location: 'Glenwood Springs', priority: 'ÉPICO' },
+                { name: 'Glenwood Caverns Adventure Park', icon: '🚡', location: 'Glenwood Springs', priority: 'CRÍTICO' },
+                { name: 'Alpine Coaster en las cavernas', icon: '🎢', location: 'Glenwood Springs', priority: 'CRÍTICO' },
+                { name: 'Iron Mountain Hot Springs', icon: '🏊', location: 'Glenwood Springs', priority: 'Alta' },
+                { name: 'Vail Village estilo bávaro', icon: '🏘️', location: 'Vail', priority: 'CRÍTICO' },
+                { name: 'Esquiar Vail Mountain (5,289 acres)', icon: '⛷️', location: 'Vail', priority: 'CRÍTICO' },
+                { name: 'Ice skating en Vail', icon: '⛸️', location: 'Vail', priority: 'Alta' },
+                { name: 'Glenwood Canyon (ruta escénica)', icon: '🏔️', location: 'I-70', priority: 'CRÍTICO' },
+                { name: 'Maroon Bells al amanecer', icon: '🌄', location: 'Aspen', priority: 'ÉPICO' },
+                { name: 'Silver Queen Gondola Aspen', icon: '🚡', location: 'Aspen', priority: 'CRÍTICO' },
+                { name: 'John Denver Sanctuary', icon: '🎵', location: 'Aspen', priority: 'Alta' },
+                { name: 'Downtown Aspen histórico', icon: '🎨', location: 'Aspen', priority: 'Alta' },
+                { name: 'Fotos familiares en la nieve', icon: '📸', location: 'Todos', priority: 'CRÍTICO' },
+                { name: 'Georgetown (pueblo minero)', icon: '🎭', location: 'Ruta', priority: 'Media' }
+            ];
+
+            const packingList = [
+                { id: 'p1', item: '🎿 Equipo de esquí (rentar allá)', category: 'Esquí' },
+                { id: 'p2', item: '🧥 Chamarra de nieve (impermeable)', category: 'Ropa' },
+                { id: 'p3', item: '🧤 Guantes térmicos', category: 'Ropa' },
+                { id: 'p4', item: '🧣 Bufanda y gorro', category: 'Ropa' },
+                { id: 'p5', item: '👕 Capas base térmica (3-4)', category: 'Ropa' },
+                { id: 'p6', item: '👖 Pantalones de nieve', category: 'Ropa' },
+                { id: 'p7', item: '🥾 Botas de nieve', category: 'Calzado' },
+                { id: 'p8', item: '👟 Tenis cómodos', category: 'Calzado' },
+                { id: 'p9', item: '🕶️ Lentes de sol (nieve refleja!)', category: 'Accesorios' },
+                { id: 'p10', item: '🧴 Bloqueador solar SPF 50+', category: 'Accesorios' },
+                { id: 'p11', item: '💊 Medicinas (altitud, mareo)', category: 'Salud' },
+                { id: 'p12', item: '🩹 Botiquín básico', category: 'Salud' },
+                { id: 'p13', item: '🪪 Pasaportes', category: 'Documentos' },
+                { id: 'p14', item: '💳 Tarjetas de crédito/débito', category: 'Documentos' },
+                { id: 'p15', item: '🎫 Confirmaciones de hotel', category: 'Documentos' },
+                { id: 'p16', item: '🚗 Confirmación renta de auto', category: 'Documentos' },
+                { id: 'p17', item: '📱 Cargadores (iPhone, cámara)', category: 'Electrónicos' },
+                { id: 'p18', item: '📷 Cámara para fotos', category: 'Electrónicos' },
+                { id: 'p19', item: '🔌 Adaptadores de corriente', category: 'Electrónicos' },
+                { id: 'p20', item: '🎒 Mochila para Emma', category: 'Emma' },
+                { id: 'p21', item: '🧸 Juguete favorito de Emma', category: 'Emma' },
+                { id: 'p22', item: '📚 Libros/tablet para Emma', category: 'Emma' },
+                { id: 'p23', item: '🍫 Snacks para el camino', category: 'Emma' },
+                { id: 'p24', item: '💵 Efectivo ($500-1000 USD)', category: 'Dinero' },
+            ];
+
+            const emergencyContacts = [
+                { name: 'Hotel Denver', phone: '(Tu hotel)', type: 'hotel' },
+                { name: 'Hotel Vail', phone: '(Tu hotel)', type: 'hotel' },
+                { name: 'Hotel Glenwood Springs', phone: '(Tu hotel)', type: 'hotel' },
+                { name: 'Embajada de México (Denver)', phone: '+1 720-508-5700', type: 'embassy' },
+                { name: 'Emergencias USA', phone: '911', type: 'emergency' },
+                { name: 'Vail Health Hospital', phone: '+1 970-476-2451', type: 'hospital' },
+                { name: 'Aspen Valley Hospital', phone: '+1 970-925-1120', type: 'hospital' },
+            ];
+
+            const addExpense = () => {
+                if (newExpense.amount && newExpense.category) {
+                    const expense = {
+                        ...newExpense,
+                        amount: parseFloat(newExpense.amount),
+                        date: new Date().toLocaleDateString(),
+                        id: Date.now()
+                    };
+                    const updated = [...expenses, expense];
+                    setExpenses(updated);
+                    setBudget(prev => ({ ...prev, spent: prev.spent + expense.amount }));
+                    setNewExpense({ amount: '', category: '', description: '' });
+                    setShowExpenseForm(false);
+                    localStorage.setItem('expenses', JSON.stringify(updated));
+                    localStorage.setItem('budget', JSON.stringify({ ...budget, spent: budget.spent + expense.amount }));
+                }
+            };
+
+            const addJournalEntry = () => {
+                if (newJournalEntry.text.trim() || newJournalEntry.highlight.trim()) {
+                    const updated = {
+                        ...journal,
+                        [currentDay]: [
+                            ...(journal[currentDay] || []),
+                            { 
+                                ...newJournalEntry,
+                                timestamp: new Date().toLocaleString(),
+                                quote: dailyQuotes[currentDay]
+                            }
+                        ]
+                    };
+                    setJournal(updated);
+                    setNewJournalEntry({ text: '', emotion: '', rating: 0, highlight: '', food: '', learned: '' });
+                    setShowJournalForm(false);
+                    localStorage.setItem('journal', JSON.stringify(updated));
+                }
+            };
+
+            const toggleChecklist = (id) => {
+                const newChecklist = new Set(checklistItems);
+                if (newChecklist.has(id)) {
+                    newChecklist.delete(id);
+                } else {
+                    newChecklist.add(id);
+                }
+                setChecklistItems(newChecklist);
+                localStorage.setItem('checklistItems', JSON.stringify([...newChecklist]));
+            };
+
+            const addCustomActivity = () => {
+                if (newActivity.name.trim()) {
+                    const activityId = `custom-${currentDay}-${Date.now()}`;
+                    const customActivity = {
+                        id: activityId,
+                        name: newActivity.name,
+                        emoji: newActivity.emoji,
+                        priority: newActivity.priority,
+                        forEmma: newActivity.forEmma
+                    };
+                    
+                    const updated = {
+                        ...customActivities,
+                        [currentDay]: [...(customActivities[currentDay] || []), customActivity]
+                    };
+                    
+                    setCustomActivities(updated);
+                    setNewActivity({ name: '', emoji: '📍', priority: 'media', forEmma: false });
+                    setShowActivityForm(false);
+                    localStorage.setItem('customActivities', JSON.stringify(updated));
+                }
+            };
+
+            const deleteCustomActivity = (dayNum, activityId) => {
+                const updated = {
+                    ...customActivities,
+                    [dayNum]: customActivities[dayNum].filter(a => a.id !== activityId)
+                };
+                setCustomActivities(updated);
+                localStorage.setItem('customActivities', JSON.stringify(updated));
+                
+                // Also remove from completed if it was checked
+                const newCompleted = new Set(completedActivities);
+                newCompleted.delete(activityId);
+                setCompletedActivities(newCompleted);
+                localStorage.setItem('completedActivities', JSON.stringify([...newCompleted]));
+            };
+
+            const togglePacking = (id) => {
+                const newChecked = new Set(packingChecked);
+                if (newChecked.has(id)) {
+                    newChecked.delete(id);
+                } else {
+                    newChecked.add(id);
+                }
+                setPackingChecked(newChecked);
+                localStorage.setItem('packingChecked', JSON.stringify([...newChecked]));
+            };
+
+            const toggleActivity = (id) => {
+                const newCompleted = new Set(completedActivities);
+                if (newCompleted.has(id)) {
+                    newCompleted.delete(id);
+                } else {
+                    newCompleted.add(id);
+                }
+                setCompletedActivities(newCompleted);
+                localStorage.setItem('completedActivities', JSON.stringify([...newCompleted]));
+            };
+
+            useEffect(() => {
+                const savedActivities = localStorage.getItem('completedActivities');
+                const savedExpenses = localStorage.getItem('expenses');
+                const savedBudget = localStorage.getItem('budget');
+                const savedJournal = localStorage.getItem('journal');
+                const savedPacking = localStorage.getItem('packingChecked');
+                const savedCustomActivities = localStorage.getItem('customActivities');
+                const savedChecklist = localStorage.getItem('checklistItems');
+                
+                if (savedActivities) setCompletedActivities(new Set(JSON.parse(savedActivities)));
+                if (savedExpenses) {
+                    const exp = JSON.parse(savedExpenses);
+                    setExpenses(exp);
+                }
+                if (savedBudget) setBudget(JSON.parse(savedBudget));
+                if (savedJournal) setJournal(JSON.parse(savedJournal));
+                if (savedPacking) setPackingChecked(new Set(JSON.parse(savedPacking)));
+                if (savedCustomActivities) setCustomActivities(JSON.parse(savedCustomActivities));
+                if (savedChecklist) setChecklistItems(new Set(JSON.parse(savedChecklist)));
+            }, []);
+
+            const currentDayData = tripDays[currentDay - 1];
+            const totalActivities = tripDays.reduce((sum, day) => sum + day.activities.length, 0) + 
+                                    Object.values(customActivities).reduce((sum, acts) => sum + acts.length, 0);
+            const completionPercentage = Math.round((completedActivities.size / totalActivities) * 100) || 0;
+            const packingPercentage = Math.round((packingChecked.size / packingList.length) * 100);
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 text-white font-sans overflow-x-hidden pb-20">
+                    {/* Snow Effect */}
+                    {[...Array(15)].map((_, i) => (
+                        <div key={i} className="snow-particle" style={{
+                            left: `${Math.random() * 100}%`,
+                            width: `${2 + Math.random() * 4}px`,
+                            height: `${2 + Math.random() * 4}px`,
+                            animationDuration: `${5 + Math.random() * 10}s`,
+                            animationDelay: `${Math.random() * 5}s`
+                        }}/>
+                    ))}
+
+                    {/* Header */}
+                    <div className="relative overflow-hidden" style={{zIndex: 1}}>
+                        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 blur-3xl"></div>
+                        <div className="relative px-4 py-6 text-center">
+                            <div className="mountain-icon inline-block mb-3">
+                                <i data-lucide="mountain" className="text-blue-400" style={{width: '50px', height: '50px'}}></i>
+                            </div>
+                            <h1 className="hero-title text-3xl md:text-5xl font-black mb-2 tracking-tight">
+                                Colorado 2026 PRO+
+                            </h1>
+                            <p className="text-sm md:text-lg text-blue-200 mb-2 font-light">
+                                Family is all we have ❄️
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Wellness & Inspiration Section */}
+                    <div className="max-w-7xl mx-auto px-4 mb-4" style={{position: 'relative', zIndex: 1}}>
+                        <div className="card-glow rounded-xl p-6">
+                            <div className="text-center mb-4">
+                                <h2 className="text-2xl font-black mb-2">✨ Inspiración Diaria</h2>
+                                <p className="text-sm text-blue-300">Nutre tu mente y espíritu durante el viaje</p>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                {/* Meditación Card */}
+                                <div className="bg-gradient-to-br from-purple-600/30 to-blue-600/30 rounded-xl p-4 border border-purple-400/30 hover:border-purple-400/60 transition-all cursor-pointer">
+                                    <div className="text-center">
+                                        <div className="text-4xl mb-2">🧘</div>
+                                        <h3 className="font-bold text-sm mb-2">Meditación 5 min</h3>
+                                        <p className="text-xs text-blue-200 mb-3">Respira y conéctate con el presente</p>
+                                        <div className="text-xs text-purple-300 space-y-1">
+                                            <p>🌬️ Inhala 4 segundos</p>
+                                            <p>⏸️ Sostén 7 segundos</p>
+                                            <p>💨 Exhala 8 segundos</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Frase del Día */}
+                                <div className="bg-gradient-to-br from-blue-600/30 to-cyan-600/30 rounded-xl p-4 border border-blue-400/30 hover:border-blue-400/60 transition-all cursor-pointer">
+                                    <div className="text-center">
+                                        <div className="text-4xl mb-2">💭</div>
+                                        <h3 className="font-bold text-sm mb-2">Frase del Día</h3>
+                                        <p className="text-sm italic text-blue-100 leading-relaxed">
+                                            "{dailyQuotes[currentDay]}"
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Afirmación Universal */}
+                                <div className="bg-gradient-to-br from-pink-600/30 to-orange-600/30 rounded-xl p-4 border border-pink-400/30 hover:border-pink-400/60 transition-all cursor-pointer">
+                                    <div className="text-center">
+                                        <div className="text-4xl mb-2">❤️</div>
+                                        <h3 className="font-bold text-sm mb-2">Afirmación del Día {currentDay}</h3>
+                                        <p className="text-sm font-bold text-orange-100 leading-relaxed px-2">
+                                            "{universalAffirmations[currentDay]}"
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Additional Wellness Tips */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+                                {/* Mindset Tip */}
+                                <div className="bg-slate-800/60 rounded-lg p-3 border border-yellow-400/20">
+                                    <div className="flex items-start gap-2">
+                                        <span className="text-2xl">💪</span>
+                                        <div className="flex-1">
+                                            <h4 className="font-bold text-xs text-yellow-300 mb-1">MINDSET</h4>
+                                            <p className="text-xs text-blue-100">
+                                                No se trata de la montaña perfecta, se trata de estar presente con las personas que amas.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Wellness Tip */}
+                                <div className="bg-slate-800/60 rounded-lg p-3 border border-green-400/20">
+                                    <div className="flex items-start gap-2">
+                                        <span className="text-2xl">💧</span>
+                                        <div className="flex-1">
+                                            <h4 className="font-bold text-xs text-green-300 mb-1">WELLNESS</h4>
+                                            <p className="text-xs text-blue-100">
+                                                En altitud: bebe 2x más agua, descansa cuando lo necesites, escucha a tu cuerpo.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Gratitude Prompt */}
+                            <div className="mt-3 bg-gradient-to-r from-purple-600/20 to-blue-600/20 rounded-lg p-4 border border-purple-400/30">
+                                <div className="text-center">
+                                    <h4 className="font-bold text-sm mb-2 text-purple-200">🙏 Momento de Gratitud</h4>
+                                    <p className="text-xs text-blue-200 mb-2">
+                                        Antes de dormir, reflexiona:
+                                    </p>
+                                    <p className="text-sm italic text-white">
+                                        "¿Cuál fue mi momento favorito de hoy?"
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Library Button */}
+                            <div className="mt-4 text-center">
+                                <button
+                                    onClick={() => setShowLibrary(!showLibrary)}
+                                    className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 px-6 py-3 rounded-lg font-bold text-sm inline-flex items-center gap-2 transition-all shadow-lg"
+                                >
+                                    <i data-lucide="book-open" style={{width: '18px', height: '18px'}}></i>
+                                    {showLibrary ? 'Cerrar Biblioteca' : '📚 Ver Biblioteca de Mentalidad'}
+                                </button>
+                            </div>
+
+                            {/* Expandable Library */}
+                            {showLibrary && (
+                                <div className="mt-4 space-y-4">
+                                    {/* Daily Reading */}
+                                    <div className="bg-gradient-to-br from-indigo-900/60 to-purple-900/60 rounded-xl p-6 border border-indigo-400/30">
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <span className="text-4xl">{dailyReadings[currentDay].emoji}</span>
+                                            <div>
+                                                <h3 className="font-bold text-xl text-white">📖 Lectura del Día {currentDay}</h3>
+                                                <p className="text-sm text-indigo-300">⏱️ 4-5 minutos de lectura</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-slate-800/60 rounded-lg p-4 mb-4">
+                                            <h4 className="font-bold text-lg text-blue-300 mb-1">{dailyReadings[currentDay].book}</h4>
+                                            <p className="text-sm text-blue-400 mb-3">por {dailyReadings[currentDay].author}</p>
+                                            <div className="inline-block bg-purple-500/30 px-3 py-1 rounded-full">
+                                                <p className="text-sm font-bold text-purple-200">🎯 {dailyReadings[currentDay].theme}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-slate-800/40 rounded-lg p-4 mb-4">
+                                            <p className="text-sm text-gray-200 leading-relaxed whitespace-pre-line">
+                                                {dailyReadings[currentDay].reading}
+                                            </p>
+                                        </div>
+
+                                        <div className="bg-gradient-to-r from-orange-900/40 to-yellow-900/40 rounded-lg p-4 border border-orange-500/30">
+                                            <h4 className="font-bold text-sm text-orange-300 mb-2 flex items-center gap-2">
+                                                <span>💡</span> Aplicación Práctica para Hoy:
+                                            </h4>
+                                            <p className="text-sm text-orange-100 leading-relaxed">
+                                                {dailyReadings[currentDay].practice}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Brian Tracy Quotes */}
+                                    <div className="bg-slate-800/60 rounded-xl p-4 border border-blue-400/30">
+                                        <h3 className="font-bold text-lg mb-3">🧠 Frases de Brian Tracy</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                            {brianTracyQuotes.map((quote, idx) => (
+                                                <div key={idx} className="bg-slate-700/50 rounded-lg p-3">
+                                                    <p className="text-sm text-blue-100">{quote}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Habit Advice */}
+                                    <div className="bg-gradient-to-br from-green-600/20 to-teal-600/20 rounded-xl p-4 border border-green-400/30">
+                                        <h3 className="font-bold text-lg mb-3">📌 Consejo para Formar Hábitos</h3>
+                                        <div className="space-y-3 text-sm text-gray-200">
+                                            <div>
+                                                <p className="font-bold text-green-300 mb-2">👉 Para formar un hábito diario de mentalidad poderosa:</p>
+                                                <ul className="space-y-1 pl-4">
+                                                    <li>• <span className="text-blue-300">365 Days of Positive Affirmations</span> - Una afirmación cada día</li>
+                                                    <li>• <span className="text-blue-300">The Secret Daily Teachings</span> - Lección diaria de ley de atracción</li>
+                                                </ul>
+                                            </div>
+                                            <div>
+                                                <p className="font-bold text-green-300 mb-2">👉 Para entender la mentalidad detrás:</p>
+                                                <ul className="space-y-1 pl-4">
+                                                    <li>• <span className="text-blue-300">You Can Heal Your Life</span> - Louise Hay (fundamentos)</li>
+                                                    <li>• <span className="text-blue-300">The Power of Positive Thinking</span> - Norman Vincent Peale (clásico)</li>
+                                                </ul>
+                                            </div>
+                                            <div>
+                                                <p className="font-bold text-green-300 mb-2">👉 Para acción y resultados:</p>
+                                                <ul className="space-y-1 pl-4">
+                                                    <li>• <span className="text-blue-300">Maximum Achievement</span> - Brian Tracy (estrategias probadas)</li>
+                                                    <li>• <span className="text-blue-300">Eat That Frog!</span> - Brian Tracy (productividad)</li>
+                                                    <li>• <span className="text-blue-300">Goals!</span> - Brian Tracy (establecimiento de metas)</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Stats */}
+                    <div className="max-w-7xl mx-auto px-4 mb-4" style={{position: 'relative', zIndex: 1}}>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            <div className="card-glow rounded-lg p-2 text-center">
+                                <i data-lucide="check-circle" className="mx-auto mb-1 text-green-400" style={{width: '20px', height: '20px'}}></i>
+                                <p className="text-xs text-blue-200">Actividades</p>
+                                <p className="text-lg font-bold">{completionPercentage}%</p>
+                            </div>
+                            <div className="card-glow rounded-lg p-2 text-center">
+                                <i data-lucide="luggage" className="mx-auto mb-1 text-purple-400" style={{width: '20px', height: '20px'}}></i>
+                                <p className="text-xs text-blue-200">Equipaje</p>
+                                <p className="text-lg font-bold">{packingPercentage}%</p>
+                            </div>
+                            <div className="card-glow rounded-lg p-2 text-center">
+                                <i data-lucide="dollar-sign" className="mx-auto mb-1 text-green-400" style={{width: '20px', height: '20px'}}></i>
+                                <p className="text-xs text-blue-200">Gastado</p>
+                                <p className="text-sm font-bold">${budget.spent}</p>
+                            </div>
+                            <div className="card-glow rounded-lg p-2 text-center">
+                                <i data-lucide="book-open" className="mx-auto mb-1 text-yellow-400" style={{width: '20px', height: '20px'}}></i>
+                                <p className="text-xs text-blue-200">Entradas</p>
+                                <p className="text-lg font-bold">{Object.keys(journal).reduce((sum, day) => sum + (journal[day]?.length || 0), 0)}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Tabs */}
+                    <div className="max-w-7xl mx-auto px-4 mb-4 overflow-x-auto" style={{position: 'relative', zIndex: 1}}>
+                        <div className="flex gap-2" style={{minWidth: 'max-content'}}>
+                            {[
+                                { id: 'itinerary', icon: 'calendar', label: 'Itinerario' },
+                                { id: 'denver', icon: 'building-2', label: 'Denver' },
+                                { id: 'events', icon: 'ticket', label: 'Eventos' },
+                                { id: 'journal', icon: 'book-open', label: 'Journal' },
+                                { id: 'packing', icon: 'luggage', label: 'Equipaje' },
+                                { id: 'expenses', icon: 'wallet', label: 'Gastos' },
+                                { id: 'mustdo', icon: 'star', label: 'Must Do' },
+                                { id: 'maps', icon: 'map', label: 'Mapas' },
+                                { id: 'docs', icon: 'file-text', label: 'Docs' },
+                                { id: 'reminders', icon: 'bell', label: 'Check' },
+                                { id: 'emergency', icon: 'phone', label: 'S.O.S' },
+                            ].map((tab) => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={`tab-button px-3 py-2 rounded-lg font-semibold whitespace-nowrap text-xs flex items-center gap-1 ${
+                                        activeTab === tab.id 
+                                            ? 'active bg-blue-600 text-white' 
+                                            : 'bg-slate-700/50 text-blue-200'
+                                    }`}
+                                >
+                                    <i data-lucide={tab.icon} style={{width: '14px', height: '14px'}}></i>
+                                    {tab.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="max-w-7xl mx-auto px-4" style={{position: 'relative', zIndex: 1}}>
+                        
+                        {/* Itinerary Tab */}
+                        {activeTab === 'itinerary' && (
+                            <div>
+                                <div className="grid grid-cols-5 md:grid-cols-10 gap-2 mb-4">
+                                    {tripDays.map((day) => (
+                                        <button
+                                            key={day.day}
+                                            onClick={() => setCurrentDay(day.day)}
+                                            className={`px-2 py-2 rounded-lg text-xs font-bold ${
+                                                currentDay === day.day
+                                                    ? 'bg-blue-600 text-white'
+                                                    : 'bg-slate-700/30 text-blue-200'
+                                            }`}
+                                        >
+                                            D{day.day}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <div className="card-glow rounded-xl p-4 mb-4">
+                                    <div className="flex items-start justify-between mb-4 flex-wrap gap-2">
+                                        <div>
+                                            <h2 className="text-2xl font-black">Día {currentDayData.day}</h2>
+                                            <p className="text-sm text-blue-300">{currentDayData.date}</p>
+                                            <p className="text-xs text-blue-200 flex items-center gap-1 mt-1">
+                                                <i data-lucide="map-pin" style={{width: '12px', height: '12px'}}></i>
+                                                {currentDayData.location}
+                                            </p>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => setShowActivityForm(!showActivityForm)}
+                                                className="bg-purple-500 hover:bg-purple-600 px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-1"
+                                            >
+                                                <i data-lucide="plus" style={{width: '14px', height: '14px'}}></i>
+                                                Añadir
+                                            </button>
+                                            <button
+                                                onClick={() => setShowRecommendations(!showRecommendations)}
+                                                className="bg-orange-500 hover:bg-orange-600 px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-1"
+                                            >
+                                                <i data-lucide="lightbulb" style={{width: '14px', height: '14px'}}></i>
+                                                Ideas
+                                            </button>
+                                            <a 
+                                                href={`https://weather.com/weather/today/l/${currentDayData.weatherLocation}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-right bg-slate-700 hover:bg-slate-600 rounded-lg px-3 py-2 cursor-pointer transition-all block"
+                                            >
+                                                <p className="text-xs text-blue-200">☀️ Ver Clima</p>
+                                                <p className="text-lg font-bold">{currentDayData.weather.temp}</p>
+                                                <p className="text-xs text-blue-300">{currentDayData.weather.condition}</p>
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    {/* Add Activity Form */}
+                                    {showActivityForm && (
+                                        <div className="bg-slate-800/80 rounded-lg p-4 mb-4">
+                                            <h3 className="font-bold mb-3 text-sm">Nueva Actividad Personalizada</h3>
+                                            <div className="space-y-3">
+                                                <div className="flex gap-2">
+                                                    <select
+                                                        className="w-20 bg-slate-700 rounded-lg px-2 py-2 text-2xl text-center"
+                                                        value={newActivity.emoji}
+                                                        onChange={(e) => setNewActivity({...newActivity, emoji: e.target.value})}
+                                                    >
+                                                        <option value="📍">📍</option>
+                                                        <option value="🍽️">🍽️</option>
+                                                        <option value="🎭">🎭</option>
+                                                        <option value="🎨">🎨</option>
+                                                        <option value="🏔️">🏔️</option>
+                                                        <option value="🎿">🎿</option>
+                                                        <option value="🏊">🏊</option>
+                                                        <option value="🛍️">🛍️</option>
+                                                        <option value="☕">☕</option>
+                                                        <option value="🎉">🎉</option>
+                                                        <option value="📸">📸</option>
+                                                        <option value="🚡">🚡</option>
+                                                        <option value="⛸️">⛸️</option>
+                                                        <option value="🎢">🎢</option>
+                                                        <option value="🌄">🌄</option>
+                                                        <option value="🎵">🎵</option>
+                                                        <option value="🏨">🏨</option>
+                                                        <option value="🚗">🚗</option>
+                                                        <option value="✨">✨</option>
+                                                        <option value="💫">💫</option>
+                                                    </select>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Nombre de la actividad"
+                                                        className="flex-1 bg-slate-700 rounded-lg px-3 py-2 text-white text-sm"
+                                                        value={newActivity.name}
+                                                        onChange={(e) => setNewActivity({...newActivity, name: e.target.value})}
+                                                    />
+                                                </div>
+                                                <div className="flex gap-2 items-center">
+                                                    <label className="flex items-center gap-2 flex-1 bg-slate-700 rounded-lg px-3 py-2 cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={newActivity.forEmma}
+                                                            onChange={(e) => setNewActivity({...newActivity, forEmma: e.target.checked})}
+                                                            className="w-4 h-4"
+                                                        />
+                                                        <span className="text-xs text-pink-300">👧 Para Emma</span>
+                                                    </label>
+                                                    <select
+                                                        className="flex-1 bg-slate-700 rounded-lg px-3 py-2 text-white text-sm"
+                                                        value={newActivity.priority}
+                                                        onChange={(e) => setNewActivity({...newActivity, priority: e.target.value})}
+                                                    >
+                                                        <option value="alta">🔴 Alta</option>
+                                                        <option value="media">🟡 Media</option>
+                                                        <option value="baja">🟢 Baja</option>
+                                                    </select>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={addCustomActivity}
+                                                        className="flex-1 bg-purple-500 hover:bg-purple-600 py-2 rounded-lg font-semibold text-sm"
+                                                    >
+                                                        Guardar Actividad
+                                                    </button>
+                                                    <button
+                                                        onClick={() => {
+                                                            setShowActivityForm(false);
+                                                            setNewActivity({ name: '', emoji: '📍', priority: 'media', forEmma: false });
+                                                        }}
+                                                        className="flex-1 bg-slate-700 hover:bg-slate-600 py-2 rounded-lg font-semibold text-sm"
+                                                    >
+                                                        Cancelar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="space-y-2">
+                                        {/* Original Activities */}
+                                        {currentDayData.activities.map((activity) => (
+                                            <div
+                                                key={activity.id}
+                                                className="activity-item bg-slate-800/60 rounded-lg p-3"
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={() => toggleActivity(activity.id)}
+                                                        className={`min-w-5 w-5 h-5 rounded border-2 flex items-center justify-center ${
+                                                            completedActivities.has(activity.id)
+                                                                ? 'bg-green-500 border-green-500'
+                                                                : 'border-blue-400'
+                                                        }`}
+                                                    >
+                                                        {completedActivities.has(activity.id) && (
+                                                            <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                        )}
+                                                    </button>
+                                                    <span className="text-xl">{activity.emoji}</span>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className={`text-xs font-semibold ${completedActivities.has(activity.id) ? 'line-through opacity-60' : ''}`}>
+                                                            {activity.name}
+                                                        </p>
+                                                        <div className="flex gap-1 mt-1">
+                                                            {activity.forEmma && (
+                                                                <span className="text-xs px-1 py-0.5 rounded bg-pink-500/20 text-pink-300">
+                                                                    Emma
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+
+                                        {/* Custom Activities */}
+                                        {customActivities[currentDay]?.map((activity) => (
+                                            <div
+                                                key={activity.id}
+                                                className="activity-item bg-purple-900/40 rounded-lg p-3 border border-purple-500/30"
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={() => toggleActivity(activity.id)}
+                                                        className={`min-w-5 w-5 h-5 rounded border-2 flex items-center justify-center ${
+                                                            completedActivities.has(activity.id)
+                                                                ? 'bg-green-500 border-green-500'
+                                                                : 'border-purple-400'
+                                                        }`}
+                                                    >
+                                                        {completedActivities.has(activity.id) && (
+                                                            <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                        )}
+                                                    </button>
+                                                    <span className="text-xl">{activity.emoji}</span>
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-center gap-2">
+                                                            <p className={`text-xs font-semibold ${completedActivities.has(activity.id) ? 'line-through opacity-60' : ''}`}>
+                                                                {activity.name}
+                                                            </p>
+                                                            <span className="text-xs px-1 py-0.5 rounded bg-purple-500/30 text-purple-300 font-bold">
+                                                                TU ACTIVIDAD
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex gap-1 mt-1">
+                                                            {activity.forEmma && (
+                                                                <span className="text-xs px-1 py-0.5 rounded bg-pink-500/20 text-pink-300">
+                                                                    Emma
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => deleteCustomActivity(currentDay, activity.id)}
+                                                        className="ml-auto bg-red-500/20 hover:bg-red-500/40 p-1 rounded"
+                                                    >
+                                                        <i data-lucide="trash-2" className="text-red-400" style={{width: '14px', height: '14px'}}></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Recommendations Section */}
+                                {showRecommendations && extraRecommendations[currentDay] && (
+                                    <div className="card-glow rounded-xl p-4 mb-4">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h3 className="font-bold flex items-center gap-2">
+                                                <i data-lucide="lightbulb" className="text-orange-400" style={{width: '18px', height: '18px'}}></i>
+                                                {extraRecommendations[currentDay].length} Ideas Extra para Día {currentDay}
+                                            </h3>
+                                            <button
+                                                onClick={() => setShowRecommendations(false)}
+                                                className="text-blue-300 hover:text-white"
+                                            >
+                                                <i data-lucide="x" style={{width: '20px', height: '20px'}}></i>
+                                            </button>
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            {extraRecommendations[currentDay].map((rec, idx) => (
+                                                <div key={idx} className="recommendation-card rounded-lg p-3">
+                                                    <div className="flex items-start gap-2">
+                                                        <span className="text-xl">{rec.name.split(' ')[0]}</span>
+                                                        <div className="flex-1">
+                                                            <h4 className="font-bold text-sm mb-1">
+                                                                {rec.name.substring(rec.name.indexOf(' ') + 1)}
+                                                            </h4>
+                                                            <p className="text-xs text-blue-200 mb-2">{rec.desc}</p>
+                                                            <div className="flex gap-2 flex-wrap">
+                                                                <span className="text-xs px-2 py-1 rounded bg-blue-500/20 text-blue-300">
+                                                                    {rec.category}
+                                                                </span>
+                                                                <span className="text-xs px-2 py-1 rounded bg-green-500/20 text-green-300">
+                                                                    {rec.cost}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Journal Section for Current Day */}
+                                <div className="card-glow rounded-xl p-4">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <h3 className="font-bold flex items-center gap-2">
+                                            <i data-lucide="book-open" style={{width: '16px', height: '16px'}}></i>
+                                            Diario Día {currentDay}
+                                        </h3>
+                                        <button
+                                            onClick={() => setShowJournalForm(!showJournalForm)}
+                                            className="bg-yellow-500 hover:bg-yellow-600 px-3 py-1 rounded text-xs font-semibold flex items-center gap-1"
+                                        >
+                                            <i data-lucide="plus" style={{width: '12px', height: '12px'}}></i>
+                                            Añadir
+                                        </button>
+                                    </div>
+
+                                    {showJournalForm && (
+                                        <div className="bg-slate-800/80 rounded-xl p-4 mb-4">
+                                            <h3 className="font-bold mb-3 text-sm">📝 {dailyQuotes[currentDay]}</h3>
+                                            
+                                            {/* Emotion Selector */}
+                                            <div className="mb-3">
+                                                <p className="text-xs text-blue-300 mb-2">¿Cómo te sentiste hoy?</p>
+                                                <div className="flex gap-2 justify-around">
+                                                    {[
+                                                        { emoji: '😄', name: 'Feliz' },
+                                                        { emoji: '😌', name: 'Relajado' },
+                                                        { emoji: '🤩', name: 'Emocionado' },
+                                                        { emoji: '🥰', name: 'Agradecido' },
+                                                        { emoji: '😴', name: 'Cansado' }
+                                                    ].map((emotion) => (
+                                                        <button
+                                                            key={emotion.name}
+                                                            onClick={() => setNewJournalEntry({...newJournalEntry, emotion: emotion.emoji})}
+                                                            className={`emotion-btn ${newJournalEntry.emotion === emotion.emoji ? 'selected' : ''}`}
+                                                            title={emotion.name}
+                                                        >
+                                                            {emotion.emoji}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            {/* Star Rating */}
+                                            <div className="mb-3">
+                                                <p className="text-xs text-blue-300 mb-2">⭐ Califica este día:</p>
+                                                <div className="flex gap-1">
+                                                    {[1, 2, 3, 4, 5].map((star) => (
+                                                        <button
+                                                            key={star}
+                                                            onClick={() => setNewJournalEntry({...newJournalEntry, rating: star})}
+                                                            className={`star-rating ${newJournalEntry.rating >= star ? 'filled' : ''}`}
+                                                        >
+                                                            ⭐
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            {/* Text Fields */}
+                                            <div className="space-y-3">
+                                                <div>
+                                                    <label className="text-xs text-blue-300 mb-1 block">💫 Lo mejor del día:</label>
+                                                    <input
+                                                        type="text"
+                                                        className="w-full bg-slate-700 rounded-lg px-3 py-2 text-white text-sm"
+                                                        placeholder="Ej: Ver a Emma esquiar por primera vez"
+                                                        value={newJournalEntry.highlight}
+                                                        onChange={(e) => setNewJournalEntry({...newJournalEntry, highlight: e.target.value})}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="text-xs text-blue-300 mb-1 block">🍽️ Mejor comida:</label>
+                                                    <input
+                                                        type="text"
+                                                        className="w-full bg-slate-700 rounded-lg px-3 py-2 text-white text-sm"
+                                                        placeholder="Ej: Hamburguesa en The George"
+                                                        value={newJournalEntry.food}
+                                                        onChange={(e) => setNewJournalEntry({...newJournalEntry, food: e.target.value})}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="text-xs text-blue-300 mb-1 block">💡 Algo que aprendí:</label>
+                                                    <input
+                                                        type="text"
+                                                        className="w-full bg-slate-700 rounded-lg px-3 py-2 text-white text-sm"
+                                                        placeholder="Ej: La altitud sí afecta, tomar agua"
+                                                        value={newJournalEntry.learned}
+                                                        onChange={(e) => setNewJournalEntry({...newJournalEntry, learned: e.target.value})}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="text-xs text-blue-300 mb-1 block">📖 Notas del día:</label>
+                                                    <textarea
+                                                        className="w-full bg-slate-700 rounded-lg px-3 py-2 text-white text-sm"
+                                                        rows="3"
+                                                        placeholder="Escribe tus pensamientos, experiencias..."
+                                                        value={newJournalEntry.text}
+                                                        onChange={(e) => setNewJournalEntry({...newJournalEntry, text: e.target.value})}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="flex gap-2 mt-3">
+                                                <button
+                                                    onClick={addJournalEntry}
+                                                    className="flex-1 bg-yellow-500 hover:bg-yellow-600 py-2 rounded-lg font-semibold text-sm"
+                                                >
+                                                    Guardar
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        setShowJournalForm(false);
+                                                        setNewJournalEntry({ text: '', emotion: '', rating: 0, highlight: '', food: '', learned: '' });
+                                                    }}
+                                                    className="flex-1 bg-slate-700 hover:bg-slate-600 py-2 rounded-lg font-semibold text-sm"
+                                                >
+                                                    Cancelar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="space-y-2">
+                                        {journal[currentDay]?.length > 0 ? (
+                                            journal[currentDay].map((entry, idx) => (
+                                                <div key={idx} className="journal-entry bg-slate-800/60 rounded-lg p-3">
+                                                    <div className="flex items-center justify-between mb-2">
+                                                        <p className="text-xs text-blue-300">{entry.timestamp}</p>
+                                                        {entry.emotion && <span className="text-2xl">{entry.emotion}</span>}
+                                                    </div>
+                                                    {entry.rating > 0 && (
+                                                        <div className="mb-2">
+                                                            {'⭐'.repeat(entry.rating)}
+                                                        </div>
+                                                    )}
+                                                    {entry.highlight && (
+                                                        <div className="mb-2">
+                                                            <p className="text-xs text-purple-300 font-bold">💫 Lo mejor:</p>
+                                                            <p className="text-sm">{entry.highlight}</p>
+                                                        </div>
+                                                    )}
+                                                    {entry.food && (
+                                                        <div className="mb-2">
+                                                            <p className="text-xs text-orange-300 font-bold">🍽️ Comida:</p>
+                                                            <p className="text-sm">{entry.food}</p>
+                                                        </div>
+                                                    )}
+                                                    {entry.learned && (
+                                                        <div className="mb-2">
+                                                            <p className="text-xs text-blue-300 font-bold">💡 Aprendí:</p>
+                                                            <p className="text-sm">{entry.learned}</p>
+                                                        </div>
+                                                    )}
+                                                    {entry.text && (
+                                                        <div>
+                                                            <p className="text-xs text-gray-400 font-bold mb-1">📖 Notas:</p>
+                                                            <p className="text-sm">{entry.text}</p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <p className="text-center text-blue-300 text-xs py-4">
+                                                ✨ {dailyQuotes[currentDay]}<br/><br/>
+                                                No hay entradas aún. ¡Escribe tus recuerdos!
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Denver Activities Tab */}
+                        {activeTab === 'denver' && (
+                            <div className="card-glow rounded-xl p-4">
+                                <h2 className="text-xl font-black mb-4 flex items-center gap-2">
+                                    <i data-lucide="building-2" className="text-blue-400" style={{width: '24px', height: '24px'}}></i>
+                                    Things to Do en Denver
+                                </h2>
+                                <div className="space-y-3">
+                                    {denverActivities.map((activity, idx) => (
+                                        <div key={idx} className="bg-slate-800/60 rounded-lg p-3">
+                                            <div className="flex items-start gap-3">
+                                                <span className="text-2xl">{activity.name.split(' ')[0]}</span>
+                                                <div className="flex-1">
+                                                    <h4 className="font-bold text-sm mb-1">
+                                                        {activity.name.substring(activity.name.indexOf(' ') + 1)}
+                                                    </h4>
+                                                    <p className="text-xs text-blue-200 mb-2">{activity.description}</p>
+                                                    <div className="flex gap-2 flex-wrap">
+                                                        <span className="text-xs px-2 py-1 rounded bg-blue-500/20 text-blue-300">
+                                                            {activity.category}
+                                                        </span>
+                                                        <span className="text-xs px-2 py-1 rounded bg-green-500/20 text-green-300">
+                                                            {activity.cost}
+                                                        </span>
+                                                        {activity.forEmma && (
+                                                            <span className="text-xs px-2 py-1 rounded bg-pink-500/20 text-pink-300">
+                                                                👧 Emma
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Events Tab */}
+                        {activeTab === 'events' && (
+                            <div className="card-glow rounded-xl p-4">
+                                <h2 className="text-xl font-black mb-4 flex items-center gap-2">
+                                    <i data-lucide="ticket" className="text-purple-400" style={{width: '24px', height: '24px'}}></i>
+                                    Eventos & Festivales
+                                </h2>
+                                <div className="space-y-3">
+                                    {events.map((event, idx) => (
+                                        <div key={idx} className="bg-slate-800/60 rounded-lg p-4">
+                                            <h4 className="font-bold text-sm mb-2">{event.name}</h4>
+                                            <div className="space-y-1 text-xs">
+                                                <p className="text-blue-200">📍 {event.location}</p>
+                                                <p className="text-blue-200">📅 {event.date}</p>
+                                                <p className="text-blue-300 mb-2">{event.description}</p>
+                                                <div className="flex gap-2">
+                                                    <span className={`px-2 py-1 rounded font-bold ${
+                                                        event.priority === 'CRÍTICO' ? 'bg-red-500 text-white' :
+                                                        event.priority === 'Alta' ? 'bg-orange-500 text-white' :
+                                                        'bg-blue-500 text-white'
+                                                    }`}>
+                                                        {event.priority}
+                                                    </span>
+                                                    {event.url && (
+                                                        <span className="text-blue-400">{event.url}</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Journal Tab */}
+                        {activeTab === 'journal' && (
+                            <div className="card-glow rounded-xl p-4">
+                                <h2 className="text-xl font-black mb-4 flex items-center gap-2">
+                                    <i data-lucide="book-open" className="text-yellow-400" style={{width: '24px', height: '24px'}}></i>
+                                    Diario del Viaje
+                                </h2>
+                                {Object.keys(journal).length === 0 ? (
+                                    <p className="text-center text-blue-300 py-8">
+                                        Aún no hay entradas. Escribe tus recuerdos en cada día del itinerario!
+                                    </p>
+                                ) : (
+                                    <div className="space-y-4">
+                                        {Object.entries(journal).map(([day, entries]) => (
+                                            <div key={day} className="bg-slate-800/60 rounded-lg p-4">
+                                                <h3 className="font-bold mb-3">Día {day} - {tripDays[parseInt(day)-1]?.date}</h3>
+                                                <div className="space-y-2">
+                                                    {entries.map((entry, idx) => (
+                                                        <div key={idx} className="journal-entry bg-slate-700/60 rounded-lg p-3">
+                                                            <p className="text-xs text-blue-300 mb-1">{entry.timestamp}</p>
+                                                            <p className="text-sm">{entry.text}</p>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Packing Tab */}
+                        {activeTab === 'packing' && (
+                            <div className="card-glow rounded-xl p-4">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h2 className="text-xl font-black flex items-center gap-2">
+                                        <i data-lucide="luggage" className="text-purple-400" style={{width: '24px', height: '24px'}}></i>
+                                        Equipaje
+                                    </h2>
+                                    <span className="text-2xl font-black text-purple-400">{packingPercentage}%</span>
+                                </div>
+                                <div className="w-full bg-slate-700 rounded-full h-3 overflow-hidden mb-4">
+                                    <div className="progress-bar h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"
+                                        style={{ width: `${packingPercentage}%` }}></div>
+                                </div>
+                                <div className="space-y-2">
+                                    {packingList.map((item) => (
+                                        <div key={item.id} className="activity-item bg-slate-800/60 rounded-lg p-2">
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    onClick={() => togglePacking(item.id)}
+                                                    className={`min-w-4 w-4 h-4 rounded border-2 flex items-center justify-center ${
+                                                        packingChecked.has(item.id)
+                                                            ? 'bg-purple-500 border-purple-500'
+                                                            : 'border-purple-400'
+                                                    }`}
+                                                >
+                                                    {packingChecked.has(item.id) && (
+                                                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                    )}
+                                                </button>
+                                                <div className="flex-1">
+                                                    <p className={`text-xs font-semibold ${packingChecked.has(item.id) ? 'line-through opacity-60' : ''}`}>
+                                                        {item.item}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Expenses Tab */}
+                        {activeTab === 'expenses' && (
+                            <div className="card-glow rounded-xl p-4">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h2 className="text-xl font-black flex items-center gap-2">
+                                        <i data-lucide="wallet" className="text-green-400" style={{width: '24px', height: '24px'}}></i>
+                                        Gastos
+                                    </h2>
+                                    <button
+                                        onClick={() => setShowExpenseForm(!showExpenseForm)}
+                                        className="bg-green-500 hover:bg-green-600 px-3 py-2 rounded text-xs font-semibold flex items-center gap-1"
+                                    >
+                                        <i data-lucide="plus" style={{width: '12px', height: '12px'}}></i>
+                                        Añadir
+                                    </button>
+                                </div>
+
+                                <div className="grid grid-cols-3 gap-2 mb-4">
+                                    <div className="bg-slate-800/60 rounded-lg p-3 text-center">
+                                        <p className="text-xs text-blue-300">Presupuesto</p>
+                                        <p className="text-lg font-black text-green-400">${budget.total}</p>
+                                    </div>
+                                    <div className="bg-slate-800/60 rounded-lg p-3 text-center">
+                                        <p className="text-xs text-blue-300">Gastado</p>
+                                        <p className="text-lg font-black text-yellow-400">${budget.spent}</p>
+                                    </div>
+                                    <div className="bg-slate-800/60 rounded-lg p-3 text-center">
+                                        <p className="text-xs text-blue-300">Restante</p>
+                                        <p className="text-lg font-black text-blue-400">${budget.total - budget.spent}</p>
+                                    </div>
+                                </div>
+
+                                {showExpenseForm && (
+                                    <div className="bg-slate-800/80 rounded-lg p-3 mb-4">
+                                        <div className="space-y-2">
+                                            <input
+                                                type="number"
+                                                placeholder="Monto ($)"
+                                                className="w-full bg-slate-700 rounded-lg px-3 py-2 text-white text-sm"
+                                                value={newExpense.amount}
+                                                onChange={(e) => setNewExpense({...newExpense, amount: e.target.value})}
+                                            />
+                                            <select
+                                                className="w-full bg-slate-700 rounded-lg px-3 py-2 text-white text-sm"
+                                                value={newExpense.category}
+                                                onChange={(e) => setNewExpense({...newExpense, category: e.target.value})}
+                                            >
+                                                <option value="">Categoría</option>
+                                                <option value="Comida">🍽️ Comida</option>
+                                                <option value="Transporte">🚗 Transporte</option>
+                                                <option value="Actividades">🎿 Actividades</option>
+                                                <option value="Souvenirs">🎁 Souvenirs</option>
+                                                <option value="Hospedaje">🏨 Hospedaje</option>
+                                                <option value="Otro">📦 Otro</option>
+                                            </select>
+                                            <input
+                                                type="text"
+                                                placeholder="Descripción"
+                                                className="w-full bg-slate-700 rounded-lg px-3 py-2 text-white text-sm"
+                                                value={newExpense.description}
+                                                onChange={(e) => setNewExpense({...newExpense, description: e.target.value})}
+                                            />
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={addExpense}
+                                                    className="flex-1 bg-green-500 hover:bg-green-600 py-2 rounded text-xs font-semibold"
+                                                >
+                                                    Guardar
+                                                </button>
+                                                <button
+                                                    onClick={() => setShowExpenseForm(false)}
+                                                    className="flex-1 bg-slate-700 hover:bg-slate-600 py-2 rounded text-xs font-semibold"
+                                                >
+                                                    Cancelar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="space-y-2">
+                                    {expenses.length === 0 ? (
+                                        <p className="text-center text-blue-300 py-6 text-xs">No hay gastos registrados</p>
+                                    ) : (
+                                        expenses.map((expense) => (
+                                            <div key={expense.id} className="bg-slate-800/60 rounded-lg p-3 flex items-center justify-between">
+                                                <div>
+                                                    <p className="font-semibold text-sm">{expense.category}</p>
+                                                    {expense.description && <p className="text-xs text-blue-300">{expense.description}</p>}
+                                                    <p className="text-xs text-gray-400">{expense.date}</p>
+                                                </div>
+                                                <p className="text-lg font-bold text-red-400">-${expense.amount}</p>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Must Do Tab */}
+                        {activeTab === 'mustdo' && (
+                            <div className="card-glow rounded-xl p-4">
+                                <h2 className="text-xl font-black mb-4 flex items-center gap-2">
+                                    <i data-lucide="star" className="text-yellow-400" style={{width: '24px', height: '24px'}}></i>
+                                    Must Do
+                                </h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    {mustDoActivities.map((activity, idx) => (
+                                        <div key={idx} className="bg-slate-800/60 rounded-lg p-3">
+                                            <div className="flex items-start gap-2">
+                                                <span className="text-2xl">{activity.icon}</span>
+                                                <div className="flex-1">
+                                                    <h4 className="font-bold text-xs mb-1">{activity.name}</h4>
+                                                    <p className="text-xs text-blue-300 mb-1">📍 {activity.location}</p>
+                                                    <span className={`inline-block text-xs px-2 py-0.5 rounded-full font-bold ${
+                                                        activity.priority === 'ÉPICO' ? 'bg-purple-500 text-white' :
+                                                        activity.priority === 'CRÍTICO' ? 'bg-red-500 text-white' :
+                                                        'bg-orange-500 text-white'
+                                                    }`}>
+                                                        {activity.priority}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Maps Tab */}
+                        {activeTab === 'maps' && (
+                            <div className="card-glow rounded-xl p-4">
+                                <h2 className="text-xl font-black mb-4 flex items-center gap-2">
+                                    <i data-lucide="map" className="text-blue-400" style={{width: '24px', height: '24px'}}></i>
+                                    Mapas y Navegación
+                                </h2>
+                                <p className="text-sm text-blue-300 mb-4">
+                                    Toca para abrir en Waze o Google Maps
+                                </p>
+                                <div className="space-y-3">
+                                    {wazeLocations.map((location, idx) => (
+                                        <div key={idx} className="bg-slate-800/60 rounded-lg p-4">
+                                            <h3 className="font-bold text-sm mb-3">{location.name}</h3>
+                                            <div className="flex gap-2">
+                                                <a
+                                                    href={location.waze}
+                                                    className="flex-1 bg-blue-500 hover:bg-blue-600 py-2 px-3 rounded-lg text-center text-sm font-semibold flex items-center justify-center gap-2"
+                                                >
+                                                    <i data-lucide="navigation" style={{width: '16px', height: '16px'}}></i>
+                                                    Abrir en Waze
+                                                </a>
+                                                <a
+                                                    href={location.gmaps}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="flex-1 bg-green-500 hover:bg-green-600 py-2 px-3 rounded-lg text-center text-sm font-semibold flex items-center justify-center gap-2"
+                                                >
+                                                    <i data-lucide="map-pin" style={{width: '16px', height: '16px'}}></i>
+                                                    Google Maps
+                                                </a>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="mt-6 bg-blue-500/20 border border-blue-500/50 rounded-lg p-4">
+                                    <p className="font-bold text-blue-300 mb-2 flex items-center gap-2">
+                                        <i data-lucide="info" style={{width: '18px', height: '18px'}}></i>
+                                        Tip Pro
+                                    </p>
+                                    <p className="text-sm text-blue-200">
+                                        📱 Waze te avisa de tráfico, policía y accidentes en tiempo real.<br/>
+                                        🗺️ Google Maps funciona mejor sin Waze instalado.<br/>
+                                        💾 Descarga mapas offline en Google Maps antes del viaje.
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Docs Tab */}
+                        {activeTab === 'docs' && (
+                            <div className="card-glow rounded-xl p-4">
+                                <h2 className="text-xl font-black mb-4 flex items-center gap-2">
+                                    <i data-lucide="file-text" className="text-blue-400" style={{width: '24px', height: '24px'}}></i>
+                                    Documentos Importantes
+                                </h2>
+                                
+                                <div className="space-y-3">
+                                    <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-lg p-4 border border-blue-500/30 mb-4">
+                                        <p className="text-sm text-blue-200">
+                                            💡 <strong>Tip:</strong> Sube tus documentos a Google Drive/Dropbox y pega los links aquí abajo. Toca cada documento para abrirlo.
+                                        </p>
+                                    </div>
+
+                                    {/* Flight Tickets */}
+                                    <div className="bg-slate-800/60 rounded-lg p-4 border border-blue-400/20">
+                                        <div className="flex items-start gap-3">
+                                            <span className="text-3xl">✈️</span>
+                                            <div className="flex-1">
+                                                <h3 className="font-bold text-sm mb-2">Boletos de Avión</h3>
+                                                <a 
+                                                    href="https://drive.google.com/your-flight-tickets-link" 
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-blue-400 hover:text-blue-300 text-xs underline block mb-1"
+                                                >
+                                                    📄 Ver boletos MEX→DEN
+                                                </a>
+                                                <a 
+                                                    href="https://drive.google.com/your-return-tickets-link" 
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-blue-400 hover:text-blue-300 text-xs underline block"
+                                                >
+                                                    📄 Ver boletos DEN→MEX
+                                                </a>
+                                                <p className="text-xs text-gray-400 mt-2">
+                                                    💡 Reemplaza estos links con tus boletos reales
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Car Rental */}
+                                    <div className="bg-slate-800/60 rounded-lg p-4 border border-green-400/20">
+                                        <div className="flex items-start gap-3">
+                                            <span className="text-3xl">🚗</span>
+                                            <div className="flex-1">
+                                                <h3 className="font-bold text-sm mb-2">Voucher Renta de Auto</h3>
+                                                <a 
+                                                    href="https://drive.google.com/your-car-rental-link" 
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-green-400 hover:text-green-300 text-xs underline block"
+                                                >
+                                                    📄 Ver voucher de renta
+                                                </a>
+                                                <p className="text-xs text-gray-400 mt-2">
+                                                    💡 Reemplaza con tu confirmación real
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Hotel Confirmations */}
+                                    <div className="bg-slate-800/60 rounded-lg p-4 border border-purple-400/20">
+                                        <div className="flex items-start gap-3">
+                                            <span className="text-3xl">🏨</span>
+                                            <div className="flex-1">
+                                                <h3 className="font-bold text-sm mb-2">Confirmaciones de Hoteles</h3>
+                                                <a 
+                                                    href="https://drive.google.com/hotel-denver" 
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-purple-400 hover:text-purple-300 text-xs underline block mb-1"
+                                                >
+                                                    📄 Hotel Denver
+                                                </a>
+                                                <a 
+                                                    href="https://drive.google.com/hotel-vail" 
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-purple-400 hover:text-purple-300 text-xs underline block mb-1"
+                                                >
+                                                    📄 Hotel Vail
+                                                </a>
+                                                <a 
+                                                    href="https://drive.google.com/hotel-glenwood" 
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-purple-400 hover:text-purple-300 text-xs underline block"
+                                                >
+                                                    📄 Hotel Glenwood Springs
+                                                </a>
+                                                <p className="text-xs text-gray-400 mt-2">
+                                                    💡 Reemplaza con tus confirmaciones reales
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Insurance */}
+                                    <div className="bg-slate-800/60 rounded-lg p-4 border border-orange-400/20">
+                                        <div className="flex items-start gap-3">
+                                            <span className="text-3xl">🛡️</span>
+                                            <div className="flex-1">
+                                                <h3 className="font-bold text-sm mb-2">Seguro de Viaje</h3>
+                                                <a 
+                                                    href="https://drive.google.com/your-insurance-link" 
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-orange-400 hover:text-orange-300 text-xs underline block"
+                                                >
+                                                    📄 Ver póliza de seguro
+                                                </a>
+                                                <p className="text-xs text-gray-400 mt-2">
+                                                    💡 Reemplaza con tu póliza real
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Ski Equipment */}
+                                    <div className="bg-slate-800/60 rounded-lg p-4 border border-cyan-400/20">
+                                        <div className="flex items-start gap-3">
+                                            <span className="text-3xl">🎿</span>
+                                            <div className="flex-1">
+                                                <h3 className="font-bold text-sm mb-2">Reserva Equipo de Esquí</h3>
+                                                <a 
+                                                    href="https://drive.google.com/ski-rental" 
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-cyan-400 hover:text-cyan-300 text-xs underline block"
+                                                >
+                                                    📄 Ver reserva de equipo
+                                                </a>
+                                                <p className="text-xs text-gray-400 mt-2">
+                                                    💡 Opcional: Si reservaste con anticipación
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Instructions */}
+                                    <div className="bg-gradient-to-r from-yellow-600/20 to-orange-600/20 rounded-lg p-4 border border-yellow-500/30 mt-4">
+                                        <h4 className="font-bold text-sm text-yellow-300 mb-2">📝 Cómo actualizar los links:</h4>
+                                        <ol className="text-xs text-gray-200 space-y-1 ml-4">
+                                            <li>1. Sube tus documentos a Google Drive o Dropbox</li>
+                                            <li>2. Haz clic derecho → "Obtener enlace" → "Cualquiera con el enlace"</li>
+                                            <li>3. Copia el enlace</li>
+                                            <li>4. Actualiza el archivo index.html con tus enlaces reales</li>
+                                            <li>5. Vuelve a subir a GitHub</li>
+                                        </ol>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Emergency Tab */}
+                        {activeTab === 'emergency' && (
+                            <div className="card-glow rounded-xl p-4">
+                                <h2 className="text-xl font-black mb-4 flex items-center gap-2">
+                                    <i data-lucide="phone" className="text-red-400" style={{width: '24px', height: '24px'}}></i>
+                                    Emergencias
+                                </h2>
+                                <div className="space-y-2">
+                                    {emergencyContacts.map((contact, idx) => (
+                                        <div key={idx} className="bg-slate-800/60 rounded-lg p-3">
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <p className="font-bold text-sm">{contact.name}</p>
+                                                    <p className="text-xs text-blue-300">{contact.type}</p>
+                                                </div>
+                                                <a 
+                                                    href={`tel:${contact.phone}`}
+                                                    className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-xs font-semibold flex items-center gap-1"
+                                                >
+                                                    <i data-lucide="phone" style={{width: '12px', height: '12px'}}></i>
+                                                    {contact.phone}
+                                                </a>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                    </div>
+
+                    {/* Footer */}
+                    <div className="text-center py-6 mt-8 border-t border-slate-700/50" style={{position: 'relative', zIndex: 1}}>
+                        <p className="text-blue-300 text-xs mb-1">
+                            Creado con ❤️ para la familia • Colorado 2026 PRO+
+                        </p>
+                        <p className="text-blue-400 text-xs">
+                            Un sueño hecho realidad 🏔️ En memoria de mamá • Para Emma 👧
+                        </p>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<ColoradoAdventure />, document.getElementById('root'));
+        setTimeout(() => lucide.createIcons(), 100);
+    </script>
+</body>
+</html>
