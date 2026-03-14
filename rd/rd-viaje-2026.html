@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="RD 2026 🌴"/>
+<title>RD 2026 🌴</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+::-webkit-scrollbar{display:none}
+body{background:#080F1D;color:#DCE6F5;font-family:'DM Sans','Segoe UI',system-ui,sans-serif;min-height:100vh;max-width:480px;margin:0 auto;overflow-x:hidden}
+.hdr{background:linear-gradient(160deg,#0B1A33 0%,#0D2847 100%);padding:18px 20px 14px;border-bottom:1px solid rgba(0,212,170,0.12);position:sticky;top:0;z-index:50}
+.hdr-sub{font-size:10px;color:#00D4AA;letter-spacing:4px;text-transform:uppercase;font-weight:700;margin-bottom:4px}
+.hdr-title{font-size:22px;font-weight:900;color:#E8EDF5;letter-spacing:-0.5px}
+.hdr-team{font-size:12px;color:#4B6080;margin-top:3px}
+.tabbar{background:#0A1220;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;position:sticky;top:72px;z-index:40}
+.tab-btn{flex:1;padding:11px 2px 10px;font-size:10px;font-weight:400;color:#566070;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:0.5px;font-family:'DM Sans',system-ui,sans-serif}
+.tab-btn.active{font-weight:700;color:#00D4AA;border-bottom:2px solid #00D4AA}
+.tab-icon{font-size:16px;margin-bottom:2px}
+.page{display:none;padding-bottom:40px}
+.page.active{display:block}
+.pad{padding:20px 16px}
+.card{background:rgba(255,255,255,0.04);border-radius:16px;border:1px solid rgba(255,255,255,0.07);margin-bottom:12px;overflow:hidden}
+.card-pad{padding:16px 20px}
+.pill{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;letter-spacing:0.3px;white-space:nowrap;display:inline-block}
+.hero{background:linear-gradient(135deg,#0C2040,#0A3050);border-radius:22px;padding:28px 20px;margin-bottom:16px;border:1px solid rgba(0,212,170,0.2);text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at top,rgba(0,212,170,0.06) 0%,transparent 70%);pointer-events:none}
+.cd-label{font-size:11px;color:#00D4AA;letter-spacing:4px;text-transform:uppercase;margin-bottom:20px;font-weight:600}
+.cd-row{display:flex;justify-content:center;gap:12px}
+.cd-unit{text-align:center;min-width:56px}
+.cd-num{font-size:46px;font-weight:900;color:#E8EDF5;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-2px}
+.cd-lbl{font-size:9px;color:#00D4AA;text-transform:uppercase;letter-spacing:2px;margin-top:6px}
+.cd-sub{margin-top:18px;font-size:12px;color:#4B6080}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.stat{background:rgba(255,255,255,0.04);border-radius:16px;border:1px solid rgba(255,255,255,0.07);padding:14px 10px;text-align:center}
+.stat-ic{font-size:18px;margin-bottom:4px}
+.stat-v{font-size:15px;font-weight:800}
+.stat-l{font-size:10px;color:#4B6080;margin-top:2px;text-transform:uppercase;letter-spacing:0.5px}
+.prog-row{display:flex;justify-content:space-between;margin-bottom:10px}
+.prog-bar{background:rgba(255,255,255,0.07);border-radius:6px;height:8px;overflow:hidden}
+.prog-fill{height:100%;border-radius:6px;transition:width .5s ease}
+.team-row{display:flex;gap:8px;flex-wrap:wrap}
+.team-pill{background:rgba(0,212,170,0.08);border:1px solid rgba(0,212,170,0.18);border-radius:20px;padding:7px 14px;font-size:13px;color:#DCE6F5;display:flex;align-items:center;gap:6px}
+.tip-row{display:flex;gap:10px;margin-bottom:10px;align-items:flex-start}
+.tip-ic{font-size:15px;flex-shrink:0;margin-top:1px}
+.tip-txt{font-size:13px;color:#8899AA;line-height:1.5}
+.day-scroll{overflow-x:auto;display:flex;gap:6px;padding:14px 16px 10px;scrollbar-width:none}
+.day-btn{padding:8px 14px;border-radius:20px;font-size:12px;font-weight:400;background:rgba(255,255,255,0.05);color:#6B7A94;border:none;cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0;font-family:'DM Sans',system-ui,sans-serif}
+.day-btn.active-day{font-weight:700;color:#080F1D}
+.act-card{border-radius:16px;border:1px solid rgba(255,255,255,0.07);margin-bottom:10px;overflow:hidden;transition:all .25s}
+.act-card.done{background:rgba(0,212,170,0.05);border-color:rgba(0,212,170,0.25);opacity:.75}
+.act-top{padding:14px 16px;cursor:pointer;display:flex;align-items:flex-start;gap:12px}
+.check-circle{width:24px;height:24px;border-radius:50%;border:2px solid #2A3A50;background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;cursor:pointer;transition:all .25s}
+.check-circle.checked{background:#00D4AA;border:none}
+.check-mark{color:#080F1D;font-size:13px;font-weight:900;display:none}
+.check-circle.checked .check-mark{display:block}
+.act-body{flex:1;min-width:0}
+.act-time{font-size:11px;font-weight:700}
+.act-badges{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:5px}
+.act-title{font-size:15px;font-weight:700;color:#DCE6F5;line-height:1.3}
+.act-card.done .act-title{text-decoration:line-through;color:#4B6080}
+.act-cost{font-size:12px;color:#4B6080;margin-top:4px}
+.chevron{color:#2A3A50;font-size:14px;margin-top:4px;flex-shrink:0}
+.act-detail{display:none;padding:0 16px 16px;border-top:1px solid rgba(255,255,255,0.05)}
+.act-desc{font-size:13px;color:#9AAABB;line-height:1.65;margin:12px 0}
+.warn-box{background:rgba(239,68,68,0.09);border:1px solid rgba(239,68,68,0.22);border-radius:10px;padding:10px 14px;font-size:12px;color:#FCA5A5;margin-bottom:12px;line-height:1.5}
+.sugg-box{background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:10px 14px;margin-bottom:12px}
+.sugg-title{font-size:11px;font-weight:700;color:#F59E0B;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.sugg-item{font-size:12px;color:#C8A96E;line-height:1.6;padding:3px 0;border-bottom:1px solid rgba(245,158,11,0.1)}
+.sugg-item:last-child{border-bottom:none}
+.sugg-item b{color:#F59E0B}
+.act-links{display:flex;gap:8px;flex-wrap:wrap}
+.link-btn{border-radius:10px;padding:9px 14px;font-size:12px;font-weight:600;text-decoration:none;border:none;cursor:pointer;font-family:'DM Sans',system-ui,sans-serif}
+.link-tel{background:rgba(0,212,170,0.1);border:1px solid rgba(0,212,170,0.22);color:#00D4AA}
+.link-web{background:rgba(59,139,235,0.1);border:1px solid rgba(59,139,235,0.22);color:#60A5FA}
+.section-title{font-size:15px;font-weight:700;color:#DCE6F5;margin-bottom:8px}
+.check-item{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:rgba(255,255,255,0.03);border-radius:12px;margin-bottom:7px;cursor:pointer;transition:all .2s;border-width:1px;border-style:solid;border-color:rgba(255,255,255,0.06)}
+.check-item.checked{opacity:.7;border-color:rgba(0,212,170,0.22)!important}
+.check-sq{width:20px;height:20px;border-radius:6px;border:2px solid #2A3A50;background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:all .2s}
+.check-sq.checked{background:#00D4AA;border:none}
+.sq-mark{color:#080F1D;font-size:11px;font-weight:900;display:none}
+.check-sq.checked .sq-mark{display:block}
+.check-lbl{font-size:14px;font-weight:600;color:#DCE6F5}
+.check-item.checked .check-lbl{text-decoration:line-through}
+.check-note{font-size:12px;color:#4B6080;margin-top:3px}
+.pack-cat{font-size:13px;font-weight:700;color:#566070;margin-bottom:8px;margin-top:4px}
+.pack-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,0.03);border-radius:10px;margin-bottom:5px;cursor:pointer;transition:opacity .2s}
+.pack-item.checked{opacity:.6}
+.pack-lbl{font-size:13px;color:#9AAABB}
+.pack-item.checked .pack-lbl{text-decoration:line-through}
+.budget-hero{background:linear-gradient(135deg,#0C2040,#0A3050);border-radius:20px;padding:24px 20px;margin-bottom:20px;border:1px solid rgba(0,212,170,0.18);text-align:center;position:relative;overflow:hidden}
+.budget-hero::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle at 50% 0%,rgba(0,212,170,0.08),transparent 70%);pointer-events:none}
+.b-lbl{font-size:10px;color:#00D4AA;letter-spacing:3px;text-transform:uppercase;margin-bottom:10px;font-weight:700}
+.b-total{font-size:52px;font-weight:900;color:#E8EDF5;letter-spacing:-2px}
+.b-sub{font-size:13px;color:#4B6080;margin-top:6px}
+.b-pp{margin-top:12px;display:inline-block;background:rgba(0,212,170,0.1);border-radius:20px;padding:6px 16px;font-size:13px;color:#00D4AA;font-weight:600}
+.budget-item{margin-bottom:14px}
+.b-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:7px}
+.b-name{font-size:13px;color:#C4CDD9;font-weight:500}
+.b-day{font-size:11px;color:#4B6080;margin-top:2px}
+.b-amt{font-size:15px;font-weight:800;color:#DCE6F5;margin-left:16px;flex-shrink:0}
+.b-amt.paid{color:#00D4AA}
+.sos-hero{display:block;background:linear-gradient(135deg,rgba(239,68,68,0.15),rgba(239,68,68,0.08));border-radius:18px;padding:22px 20px;margin-bottom:16px;border:1px solid rgba(239,68,68,0.3);text-decoration:none;text-align:center}
+.sos-lbl{font-size:11px;color:#FCA5A5;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;font-weight:700}
+.sos-num{font-size:52px;font-weight:900;color:#E8EDF5;letter-spacing:-2px}
+.sos-sub{font-size:12px;color:#FCA5A5;margin-top:6px}
+.sos-btn{margin-top:14px;background:rgba(239,68,68,0.2);border-radius:10px;padding:8px 20px;display:inline-block;font-size:13px;color:#FCA5A5;font-weight:700}
+.contact-item{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:14px;margin-bottom:8px;text-decoration:none;transition:all .2s}
+.c-name{font-size:14px;font-weight:600;color:#DCE6F5}
+.c-num{font-size:12px;color:#00D4AA;margin-top:3px;font-weight:500}
+.c-right{display:flex;align-items:center;gap:8px}
+.c-call{background:rgba(0,212,170,0.1);border:1px solid rgba(0,212,170,0.18);border-radius:10px;padding:7px 12px;font-size:12px;color:#00D4AA;font-weight:700}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-sub">🌴 República Dominicana</div>
+  <div class="hdr-title">20 – 28 Marzo 2026</div>
+  <div class="hdr-team">José · Emma · Mariela · Mayra 👧</div>
+</div>
+
+<div class="tabbar">
+  <button class="tab-btn active" onclick="switchTab('home',this)"><div class="tab-icon">🏠</div>Inicio</button>
+  <button class="tab-btn" onclick="switchTab('days',this)"><div class="tab-icon">📅</div>Días</button>
+  <button class="tab-btn" onclick="switchTab('check',this)"><div class="tab-icon">☑️</div>Lista</button>
+  <button class="tab-btn" onclick="switchTab('budget',this)"><div class="tab-icon">💵</div>Budget</button>
+  <button class="tab-btn" onclick="switchTab('sos',this)"><div class="tab-icon">🆘</div>SOS</button>
+</div>
+
+<!-- HOME -->
+<div id="page-home" class="page active pad">
+  <div class="hero">
+    <div class="cd-label">🌴 SALIDA EN</div>
+    <div class="cd-row" id="countdown">
+      <div class="cd-unit"><div class="cd-num" id="cd-d">--</div><div class="cd-lbl">DÍAS</div></div>
+      <div class="cd-unit"><div class="cd-num" id="cd-h">--</div><div class="cd-lbl">HRS</div></div>
+      <div class="cd-unit"><div class="cd-num" id="cd-m">--</div><div class="cd-lbl">MIN</div></div>
+      <div class="cd-unit"><div class="cd-num" id="cd-s">--</div><div class="cd-lbl">SEG</div></div>
+    </div>
+    <div class="cd-sub">Viernes 20 Marzo 2026 · Vuelo a República Dominicana ✈️</div>
+  </div>
+  <div class="card card-pad" style="margin-bottom:12px">
+    <div style="font-size:10px;color:#00D4AA;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:12px;font-weight:700">El Equipo</div>
+    <div class="team-row">
+      <div class="team-pill"><span>🧔</span><span>José</span></div>
+      <div class="team-pill"><span>👧</span><span>Emma</span></div>
+      <div class="team-pill"><span>👩</span><span>Mariela</span></div>
+      <div class="team-pill"><span>👩‍🦱</span><span>Mayra</span></div>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="stat-ic">📅</div><div class="stat-v" style="color:#00D4AA">9</div><div class="stat-l">Días</div></div>
+    <div class="stat"><div class="stat-ic">✅</div><div class="stat-v" style="color:#10B981" id="stat-acts">0/22</div><div class="stat-l">Hechas</div></div>
+    <div class="stat"><div class="stat-ic">🧳</div><div class="stat-v" style="color:#F59E0B" id="stat-pack">0/29</div><div class="stat-l">Packed</div></div>
+    <div class="stat"><div class="stat-ic">💵</div><div class="stat-v" style="color:#EF4444">$4k</div><div class="stat-l">USD</div></div>
+  </div>
+  <div class="card card-pad" style="margin-bottom:12px">
+    <div class="prog-row"><span style="font-size:13px;font-weight:600;color:#DCE6F5">Progreso del viaje</span><span style="font-size:13px;font-weight:700;color:#00D4AA" id="prog-pct">0%</span></div>
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="background:linear-gradient(90deg,#00D4AA,#3B8BEB);width:0%"></div></div>
+  </div>
+  <div class="card card-pad">
+    <div style="font-size:10px;color:#F59E0B;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:14px;font-weight:700">⚡ Tips Esenciales</div>
+    <div class="tip-row"><span class="tip-ic">💱</span><span class="tip-txt">1 USD ≈ 58–60 DOP · Solo billetes chicos para propinas</span></div>
+    <div class="tip-row"><span class="tip-ic">🌡️</span><span class="tip-txt">28–32°C todo el viaje · Bloqueador reef-safe siempre</span></div>
+    <div class="tip-row"><span class="tip-ic">🚗</span><span class="tip-txt">Cuidado con mototaxis y baches nocturnos al manejar</span></div>
+    <div class="tip-row"><span class="tip-ic">💧</span><span class="tip-txt">Solo agua embotellada — nunca del grifo</span></div>
+    <div class="tip-row"><span class="tip-ic">📵</span><span class="tip-txt">Activar plan de roaming o comprar SIM local al llegar</span></div>
+    <div class="tip-row"><span class="tip-ic">🏖️</span><span class="tip-txt">Llevar hielera/nevera con agua para días de playa virgen</span></div>
+    <div class="tip-row"><span class="tip-ic">👟</span><span class="tip-txt">Escarpines para playas con erizos (Frontón, Ermitaño)</span></div>
+    <div class="tip-row"><span class="tip-ic">🚗</span><span class="tip-txt">Verificar altura del carro rental — hay caminos de tierra</span></div>
+    <div class="tip-row"><span class="tip-ic">📸</span><span class="tip-txt">GoPro o funda waterproof — se usa todos los días</span></div>
+  </div>
+</div>
+
+<!-- DÍAS -->
+<div id="page-days" class="page">
+  <div class="day-scroll" id="day-scroll"></div>
+  <div style="padding:0 16px 24px" id="day-content"></div>
+</div>
+
+<!-- CHECKLIST -->
+<div id="page-check" class="page pad">
+  <div style="margin-bottom:28px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div class="section-title">📋 Reservaciones</div>
+      <div class="pill" style="background:rgba(0,212,170,0.12);color:#00D4AA" id="res-count">0/9</div>
+    </div>
+    <div class="prog-bar" style="margin-bottom:14px"><div class="prog-fill" id="res-bar" style="background:#00D4AA;width:0%"></div></div>
+    <div id="res-list"></div>
+  </div>
+  <div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div class="section-title">🧳 Lista de Maleta</div>
+      <div class="pill" style="background:rgba(245,158,11,0.15);color:#F59E0B" id="pack-count">0/29</div>
+    </div>
+    <div class="prog-bar" style="margin-bottom:16px"><div class="prog-fill" id="pack-bar" style="background:#F59E0B;width:0%"></div></div>
+    <div id="pack-list"></div>
+  </div>
+</div>
+
+<!-- BUDGET -->
+<div id="page-budget" class="page pad">
+  <div class="budget-hero">
+    <div class="b-lbl">Presupuesto Estimado Total</div>
+    <div class="b-total">$4,080</div>
+    <div class="b-sub">USD · 4 personas · 9 días</div>
+    <div class="b-pp">~$1,020 por persona</div>
+  </div>
+  <div id="budget-list"></div>
+</div>
+
+<!-- SOS -->
+<div id="page-sos" class="page pad">
+  <a href="tel:911" class="sos-hero">
+    <div class="sos-lbl">🚨 Emergencias República Dominicana</div>
+    <div class="sos-num">9-1-1</div>
+    <div class="sos-sub">Policía · Bomberos · Ambulancia</div>
+    <div class="sos-btn">📞 Toca para llamar</div>
+  </a>
+  <div style="font-size:10px;color:#4B6080;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:12px;font-weight:700">Contactos del Viaje</div>
+  <div id="contacts-list"></div>
+</div>
+
+<script>
+const TRIP_START = new Date("2026-03-20T08:00:00");
+
+const DAYS = [
+  {
+    id:0, label:"Vie 20", title:"Llegada · Road Trip", icon:"✈️", color:"#00D4AA", loc:"SDQ → Punta Cana",
+    zone:"La Romana · Bayahíbe · Bávaro",
+    suggestions:[
+      {name:"🍳 Restaurantes Playa Caleta", note:"La playa local de La Romana · frente al malecón · pescado fresco · dominicanos reales"},
+      {name:"🏛️ Parque Central La Romana", note:"Jardines, estatuas de béisbol, Iglesia Santa Rosa de Lima · ciudad dominicana viva"},
+      {name:"⛵ Pueblo de Bayahíbe", note:"Pueblo pesquero más encantador de la zona · botes de colores · ambiente 100% local"},
+      {name:"🏖️ Playa Dominicus", note:"Junto a Bayahíbe · aguas turquesas tranquilas · menos turistas que Bávaro"},
+      {name:"⚓ El Cortecito (Bávaro)", note:"Barrio pesquero más auténtico de Bávaro · restaurantes locales frente al mar"},
+    ],
+    activities:[
+      {id:"a0", time:"9:00 am", name:"Salida aeropuerto SDQ · Carro rentado", desc:"Recoger el carro en Las Américas y salir directo al Este por la Autopista del Este. No pasar por el centro de SD — tomar la autopista directo. La Romana queda a 1.5h del aeropuerto.", cost:"Carro rental", hrs:"Drive", emma:true},
+      {id:"a1", time:"10:30 am", name:"Desayuno en La Romana · Playa Caleta", desc:"La Romana es una ciudad dominicana auténtica — los springbreakers ni la conocen. Parque Central con jardines, estatuas de jugadores de béisbol e iglesia de piedra. Playa Caleta frente al malecón con restaurantes locales de pescado fresco. Desayuno ligero con vista al mar.", cost:"~$40 grupo", hrs:"1.5h", warn:"💡 La Romana queda exactamente en ruta SDQ → Punta Cana · no es desvío.", emma:true},
+      {id:"a2", time:"12:00 pm", name:"Supermercado Jumbo · La Romana", desc:"Compra estratégica para todo el viaje: agua embotellada, alcohol (Brugal, Presidente), frutas, snacks para Emma, desayunos para Punta Cana y Las Terrenas, frituras y picaderas para las playas.", cost:"~$120 grupo", hrs:"45min", warn:"⛽ Llenar el tanque de gasolina aquí también — después de La Romana hay menos estaciones en ruta.", emma:false},
+      {id:"a3", time:"1:00 pm", name:"Bayahíbe · Pueblo pesquero", desc:"El pueblo pesquero más encantador de la zona este. Casas de colores, botes de madera anclados, palmeras. Playa tranquila con restaurantes de mariscos frente al mar. Ambiente de comunidad real — nada de resorts masivos. Perfecto para el primer sabor auténtico del Caribe.", cost:"Almuerzo ~$50", hrs:"2h", emma:true},
+      {id:"a4", time:"4:00 pm", name:"Llegada Punta Cana · Check-in Airbnb", desc:"Instalarse en el Airbnb de Bávaro, la base para los días 20-23. Organizar la compra, refrescarse.", cost:"", hrs:"", emma:true},
+      {id:"a5", time:"7:00 pm", name:"Cena El Cortecito", desc:"El barrio más auténtico de Bávaro. Restaurantes locales frente al mar con pescado del día y ambiente caribeño real sin resorts. La primera cena dominicana del viaje.", cost:"~$60 grupo", hrs:"2h", emma:true},
+    ]
+  },
+  {
+    id:1, label:"Sáb 21", title:"⭐ Isla Saona", icon:"🛥️", color:"#3B8BEB", loc:"Isla Saona", reserved:true,
+    zone:"Isla Saona · Playa Bávaro",
+    suggestions:[
+      {name:"🌊 Soles Beach Club", note:"23 años de historia · pies en arena · parrilla argentina · mariscos frescos"},
+      {name:"🎶 Cabanna Punta Cana", note:"Inspirado en las Baleares · paella · DJ los sábados · ambiente Ibiza"},
+      {name:"🌅 Cielo Beach Club", note:"Vistas al océano · ambiente tranquilo · cocina local e internacional"},
+      {name:"🍹 Onno's Bar", note:"Primera línea de playa El Cortecito · street food · cócteles tropicales"},
+      {name:"⚓ Capitán Cook", note:"El Cortecito · mariscos del Caribe · paella Doña Amalia · ambiente marinero"},
+    ],
+    activities:[
+      {id:"b0", time:"7:00 am", name:"Tour Isla Saona — ✅ YA RESERVADO", desc:"La playa más hermosa del Caribe dominicano. Catamarán, piscina natural con estrellas de mar, open bar, arena blanca perfecta y cocos a la orilla. Un día de película que Emma jamás olvidará.", cost:"✅ Pagado", hrs:"Día completo", emma:true, booked:true},
+      {id:"b1", time:"8:00 pm", name:"Cena Soles Beach Club", desc:"Después de un día épico en Saona, cenar con los pies en la arena en Los Corales. Pescados y mariscos recién salidos del mar, parrilla argentina al carbón. El lugar ideal para cerrar el mejor día del viaje.", cost:"~$80 grupo", hrs:"2h", emma:true},
+    ]
+  },
+  {
+    id:2, label:"Dom 22", title:"Miches · Playas Vírgenes", icon:"🏔️", color:"#F59E0B", loc:"Miches / El Seibo",
+    zone:"Montaña Redonda · Playa Limón · Playa Esmeralda",
+    suggestions:[
+      {name:"🍽️ Restaurante Montaña Redonda", note:"En la cima · único lugar para comer en la zona · vistas 360°"},
+      {name:"🏠 Rancho La Cueva", note:"A 300m de Playa Limón · almuerzo criollo · paseos a caballo"},
+      {name:"🌊 Playa Esmeralda", note:"La más espectacular de Miches · virgen · sin servicios · llevar todo"},
+      {name:"🏄 Playa de la Barbacoa", note:"Alternativa salvaje · camino de tierra · solo carro alto · sin turistas"},
+      {name:"🦆 Laguna Redonda/Limón", note:"Kayak entre manglares · biodiversidad única · desde El Cedro"},
+    ],
+    activities:[
+      {id:"c0", time:"8:00 am", name:"Montaña Redonda", desc:"Vistas 360° épicas desde el filo del cerro con la selva y el mar abajo. Columpios sobre el vacío, hamacas al borde, zipline. La foto más impresionante del viaje. Comer algo en el restaurante de la cima antes de bajar.", cost:"~$16 jeep + comida", hrs:"2.5h", phone:"+1 809-481-0712", link:"https://redondamountain.com", warn:"⏰ Llegar EXACTO a las 8am — antes que los grupos organizados. El acceso final es en camioneta 4x4 del lugar — tu carro queda en el estacionamiento base.", emma:true},
+      {id:"c1", time:"11:00 am", name:"Playa Limón + Rancho La Cueva", desc:"3km de playa virgen con arena blanca y cocoteros. El río Cedro de agua dulce desemboca aquí mezclándose con el mar — uno de los fenómenos más fotogénicos de RD. Almuerzo en Rancho La Cueva a 300m de la playa.", cost:"Almuerzo ~$50", hrs:"3h", warn:"🚗 Accesible en carro normal por autopista 104. Llevar snacks, agua y equipo de playa.", emma:true},
+      {id:"c2", time:"3:00 pm", name:"Playa Esmeralda", desc:"La playa más espectacular de Miches — 2km de arena blanca virgen con aguas turquesas imposibles. Sin un solo resort. Los cocoteros llegan hasta el agua. Solo accesible con carro alto.", cost:"Gratis", hrs:"2h", warn:"⚠️ Vehículo con altura mínima recomendada. Sin servicios — llevar todo. Salir antes de las 5pm.", emma:true},
+    ]
+  },
+  {
+    id:3, label:"Lun 23", title:"Buggies VIP · Macao", icon:"🏎️", color:"#EF4444", loc:"Macao, Punta Cana",
+    zone:"Zona Macao · El Cortecito · Bávaro",
+    suggestions:[
+      {name:"⚓ Capitán Cook", note:"El Cortecito · mesas junto al mar · paella Doña Amalia · mariscos frescos"},
+      {name:"🌊 Huracán Café", note:"Frente al mar · música en vivo · fusión caribeña-internacional"},
+      {name:"🏖️ Onno's Beach Bar", note:"El Cortecito · pies en la arena · street food · cócteles"},
+      {name:"🎶 Platanitos", note:"Centro Bávaro · cabaña dominicana · mofongo · mariscos · cócteles"},
+      {name:"🌙 Cabanna Punta Cana", note:"Ambiente nocturno vibrante · DJ · paella · cócteles premium"},
+    ],
+    activities:[
+      {id:"d0", time:"9:00 am", name:"Tour Privado VIP Buggies", desc:"Buggies 4WD reales EXCLUSIVOS para el grupo. Farmland remoto con la Cordillera Oriental al fondo, lodo, plantaciones de tabaco y palmas. Rancho con café, cacao y Mamajuana dominicana. Cueva oculta con piscina subterránea natural.", cost:"~$100/persona", hrs:"4h", link:"https://puntacanagroups.com", warn:"📌 Pedir tour PRIVADO exclusivo — no compartido.\n👧 Emma apta desde 5 años ✅\n⚠️ No pagar al señor del cono en el parking de Macao — estafa conocida.", emma:true},
+      {id:"d1", time:"1:00 pm", name:"Playa de Macao", desc:"Final del buggy tour. La última playa auténtica de Punta Cana sin un solo resort. Arena dorada, olas perfectas para surfear, cocos y ambiente dominicano puro.", cost:"Incluido en tour", hrs:"2h", emma:true},
+      {id:"d2", time:"8:00 pm", name:"Cena Capitán Cook", desc:"El restaurante más auténtico de El Cortecito. Decoración marinera, primera línea de playa, especializado en mariscos del Caribe. La paella Doña Amalia es la especialidad de la casa — preparada con mimo.", cost:"~$70 grupo", hrs:"2h", emma:true},
+    ]
+  },
+  {
+    id:4, label:"Mar 24", title:"Drive épico → Las Terrenas", icon:"🚗", color:"#8B5CF6", loc:"Monte Plata → Samaná",
+    zone:"Salto de Socoa · Autopista del Nordeste · Las Terrenas",
+    suggestions:[
+      {name:"🌊 Salto de Socoa", note:"Monumento Natural · cascada 20m · aguas jade · escalera de pozas · barro facial"},
+      {name:"🍽️ Pacomer", note:"Punta Popy LT · mesas en la arena · cangrejo con coco · auténtico caribeño"},
+      {name:"☕ La Boulangerie", note:"Mejor desayuno de Las Terrenas · pan artesanal francés · jugos frescos"},
+      {name:"🌊 Porto by Mosquito", note:"Frente a la playa LT · fusión caribeña-mediterránea · ambiente relajado"},
+      {name:"🏖️ Playa Punta Popy", note:"5 min a pie del centro LT · cálida · arena fina · bares con servicio en la orilla"},
+    ],
+    activities:[
+      {id:"e0", time:"8:00 am", name:"Salida de Punta Cana", desc:"Drive épico por la Autopista del Nordeste. El paisaje va cambiando de caribeño a tropical montañoso. Curvas, selva, ríos, pueblos escondidos. El drive en sí es parte de la experiencia.", cost:"Gasolina", hrs:"Drive", emma:true},
+      {id:"e1", time:"10:00 am", name:"Salto de Socoa · Monte Plata", desc:"Monumento Natural en la Autopista del Nordeste, literalmente a orilla de la carretera. Cascada de 20m que forma una escalera de piscinas naturales jade en cascada. Aguas frías y cristalinas, barro natural para mascarilla facial, selva tropical densa. Idéntico feeling al balneario de Neiba.", cost:"~$2/persona", hrs:"2h", warn:"🚗 Acceso fácil: señalizado en la autopista, 5 min caminando. Llevar escarpines, toallas y ropa de cambio. ⚠️ No cocinar en el área — sí llevar comida preparada.", emma:true},
+      {id:"e2", time:"12:30 pm", name:"Almuerzo en el camino", desc:"Parar en algún restaurante de pueblo en la ruta hacia Samaná. Probar comida criolla dominicana real — sancocho, pollo guisado, tostones. Los pueblos entre Monte Plata y Samaná tienen comedores auténticos.", cost:"~$40 grupo", hrs:"45min", emma:true},
+      {id:"e3", time:"5:00 pm", name:"Check-in Sea Mare · Las Terrenas", desc:"Apartamentos en Calle 17 de Febrero, a 5 minutos caminando de Playa Punta Popy. Instalarse, descansar brevemente y caminar a la playa para el primer atardecer en Samaná.", cost:"", hrs:"", emma:true},
+      {id:"e4", time:"6:00 pm", name:"Playa Punta Popy", desc:"La playa más cómoda y animada de Las Terrenas. A 5 minutos caminando del Sea Mare. Aguas cálidas y cristalinas, tumbonas con servicio, restaurantes al frente. El primer atardecer en Samaná.", cost:"Cócteles ~$30", hrs:"1.5h", emma:true},
+      {id:"e5", time:"8:00 pm", name:"Cena Pacomer · Punta Popy", desc:"Mesas en la arena, sin pretensiones, producto de mercado fresco del día. Cangrejo con coco espectacular. Auténtico, pintoresco y criollo con vistas hermosas. El tipo de lugar que solo encuentras si sabes dónde buscar.", cost:"~$60 grupo", hrs:"2h", emma:true},
+    ]
+  },
+  {
+    id:5, label:"Mié 25", title:"Frontón + Madama", icon:"🏄", color:"#10B981", loc:"Las Galeras · Samaná",
+    zone:"Las Galeras · Playa Frontón · Playa Madama",
+    suggestions:[
+      {name:"🏖️ Playa Rincón", note:"Una de las mejores del mundo · accesible en carro desde Las Galeras · río de agua dulce"},
+      {name:"🤿 Scubaquatic Las Galeras", note:"Buceo y snorkel profesional · tour a Ermitaño con 2 paradas de snorkel"},
+      {name:"🍽️ Restaurante Las Galeras", note:"10 min del pueblo · familia local · cocina dominicana auténtica"},
+      {name:"🚤 Tour 7 Playas", note:"Desde Las Galeras · recorre 7 playas vírgenes en bote · día épico"},
+      {name:"🦆 Playa El Valle", note:"45 min de Las Galeras · surf · muy virgen · escenario de series de TV"},
+    ],
+    activities:[
+      {id:"f0", time:"7:30 am", name:"Drive Las Terrenas → Las Galeras", desc:"45 minutos de carretera por la punta de la Península de Samaná. Paisaje de película — montañas verdes cayendo al mar, pueblo de pescadores al llegar.", cost:"Gasolina", hrs:"45min", emma:true},
+      {id:"f1", time:"9:00 am", name:"Tour Frontón + Playa Madama en bote", desc:"Abordaje en Playa Grande, Las Galeras. 20 minutos en bote con vistas espectaculares de acantilados. Primera parada: Playa Frontón — acantilados de 90 metros, snorkel en arrecifes de coral visibles desde el agua, cuevas explorables, aguas cristalinas vírgenes. Segunda parada: Playa Madama — joya escondida perfecta para relajarse.", cost:"~$35/persona", hrs:"5h", warn:"👟 Llevar escarpines — hay erizos en el fondo.\n🤿 Llevar snorkel propio si tienen.\n☀️ Bloqueador reef-safe obligatorio.", emma:true},
+      {id:"f2", time:"1:30 pm", name:"Almuerzo en Playita Las Galeras", desc:"Regreso a Playita Las Galeras con pescado fresco, arroz, tostones y ensalada. Almuerzo tradicional dominicano con vista al mar. El cierre perfecto de un día de playas vírgenes.", cost:"Incluido en tour", hrs:"1h", emma:true},
+      {id:"f3", time:"4:00 pm", name:"Regreso Las Terrenas", desc:"Drive tranquilo de regreso al Sea Mare. Atardecer desde la carretera costera de la Península de Samaná.", cost:"Gasolina", hrs:"45min", emma:true},
+    ]
+  },
+  {
+    id:6, label:"Jue 26", title:"Day Pass El Portillo", icon:"🏨", color:"#F97316", loc:"Bahia Principe · El Portillo",
+    zone:"Resort Bahia Principe El Portillo · Las Terrenas",
+    suggestions:[
+      {name:"🎾 Actividades en El Portillo", note:"Kayak · snorkel · catamarán · tenis · windsurf · todo incluido"},
+      {name:"🌊 ETNO Beach Club", note:"Las Terrenas · ambiente relajado · música en vivo · cócteles · noche"},
+      {name:"🎶 Bambú Beach Club", note:"Las Terrenas · frente al mar · DJ · vibra nocturna"},
+      {name:"🍕 La Vita è Bella", note:"Italiano frente al mar LT · pasta con langosta · pizza horno leña"},
+      {name:"🌙 Bar Ostia Gastro Pub", note:"Centro LT · fusión internacional · ambiente animado · cócteles artesanales"},
+    ],
+    activities:[
+      {id:"g0", time:"10:30 am", name:"Check-in Day Pass · Bahia Principe El Portillo", desc:"El mejor todo incluido de Las Terrenas directamente en la playa. Día completo de recuperación después de días intensos. Piscinas espectaculares, parque acuático para Emma, playa privada, 7 restaurantes, bar en la playa, deportes acuáticos.", cost:"$80/adulto · $40 Emma", hrs:"6.5h", phone:"+1 809-240-6100", warn:"📧 Reservar con anticipación: gerenterecepcionbppor@bahia-principe.com\n👧 Emma: 50% descuento (3-11 años)\n⏰ Check-in 10:30am · Check-out 5:00pm"},
+      {id:"g1", time:"5:00 pm", name:"Check-out · Tarde libre en Las Terrenas", desc:"Regreso al Sea Mare. Tarde tranquila en Las Terrenas — pasear por la calle principal, ver las tiendas, cenar en algún restaurante local del centro.", cost:"", hrs:"", emma:true},
+    ]
+  },
+  {
+    id:7, label:"Vie 27", title:"Santo Domingo", icon:"🏛️", color:"#EC4899", loc:"Santo Domingo",
+    zone:"Zona Colonial · Calle El Conde · Malecón",
+    suggestions:[
+      {name:"🍽️ La Caña (Zona Colonial)", note:"Restaurante colonial con terraza · cocina criolla elevada · ambiente histórico"},
+      {name:"🍽️ El Mesón de la Cava", note:"Restaurante dentro de una cueva natural · cocina internacional · experiencia única"},
+      {name:"🛍️ Calle El Conde", note:"La arteria principal de la Zona Colonial · larimar · ámbar · ron · tabaco · artesanías"},
+      {name:"💎 Tienda de Larimar", note:"Calle El Conde y alrededores · la piedra azul única del Caribe · solo en RD"},
+      {name:"🌊 Malecón atardecer", note:"Av. George Washington · cócteles frente al mar · brisa caribeña · el cierre perfecto"},
+      {name:"🏛️ Alcázar de Colón", note:"Palacio del hijo de Cristóbal Colón · primera residencia noble del continente"},
+      {name:"⚓ Fortaleza Ozama", note:"La más antigua del continente americano (1502) · vistas al río Ozama"},
+    ],
+    activities:[
+      {id:"h0", time:"7:00 am", name:"Salida de Las Terrenas", desc:"Drive final de la Península hacia la capital. ~2.5 horas por la Autopista del Nordeste. Paisaje cambiante de tropical a urbano.", cost:"Gasolina", hrs:"2.5h", emma:true},
+      {id:"h1", time:"10:00 am", name:"Zona Colonial · UNESCO", desc:"La primera ciudad permanente europea en el Nuevo Mundo (1498). Catedral de Santa María la Menor — primera del continente americano — Alcázar de Colón, Fortaleza Ozama (la más antigua de América), y las calles empedradas del siglo XVI. Caminar sin prisa y absorber 500 años de historia.", cost:"~$15 entradas", hrs:"3h", warn:"👟 Usar zapatos cómodos para los adoquines coloniales.\n🌡️ Muy caluroso al mediodía — llevar agua.", emma:true},
+      {id:"h2", time:"12:30 pm", name:"Almuerzo en restaurante colonial", desc:"La Zona Colonial tiene terrazas increíbles con cocina criolla elevada. La Caña o algún restaurante con vista a las calles empedradas. La última comida dominicana del viaje — hacerla memorable.", cost:"~$80 grupo", hrs:"1.5h", emma:true},
+      {id:"h3", time:"2:00 pm", name:"Compras · Calle El Conde", desc:"La arteria principal de la Zona Colonial. Larimar (la piedra azul única del Caribe que solo existe en RD), ámbar dominicano, ron Brugal Añejo o Barceló Imperial, tabaco, artesanías locales. Mejor aquí que en el Mercado Modelo — más auténtico y mejor precio.", cost:"Presupuesto libre", hrs:"1.5h", warn:"💡 Regatear es parte de la cultura — es esperado y aceptado.\n💎 El larimar auténtico tiene tonos azul celeste y se siente frío al tacto.", emma:false},
+      {id:"h4", time:"3:00 pm", name:"Check-in Airbnb · Calle María Trinidad Sánchez", desc:"El Airbnb está en Gazcue, entre la Zona Colonial y el Malecón — ubicación perfecta. Dejar maletas, refrescarse para la última noche del viaje.", cost:"", hrs:"", emma:true},
+      {id:"h5", time:"5:30 pm", name:"Malecón al atardecer", desc:"La Avenida George Washington frente al Mar Caribe. A 5 minutos caminando del Airbnb. Cócteles, brisa marina, música dominicana. El broche de oro del viaje — el atardecer final antes de regresar a México.", cost:"~$40 cócteles", hrs:"1.5h", emma:true},
+      {id:"h6", time:"8:00 pm", name:"Cena final · Santo Domingo", desc:"Última cena del viaje. Zona del Malecón o Gazcue tienen buenas opciones. Celebrar 9 días increíbles en República Dominicana.", cost:"~$70 grupo", hrs:"2h", emma:true},
+    ]
+  },
+  {
+    id:8, label:"Sáb 28", title:"Regreso a México ✈️", icon:"✈️", color:"#6366F1", loc:"Aeropuerto SDQ",
+    zone:"Aeropuerto Las Américas · Santo Domingo",
+    suggestions:[
+      {name:"☕ Desayuno último caribeño", note:"Mangú con los tres golpes · café santo domingo · jugos tropicales"},
+      {name:"🏬 Duty Free SDQ", note:"Ron Barceló Imperial y Brugal Leyenda son los mejores souvenirs líquidos"},
+      {name:"🛂 SDQ Tips", note:"Llegar 2.5h antes · Terminal B para vuelos internacionales · fila migración puede ser larga"},
+      {name:"🚗 Devolución carro", note:"Llegar con tanque lleno · hay gasolineras en la autopista Las Américas camino al aeropuerto"},
+    ],
+    activities:[
+      {id:"i0", time:"7:30 am", name:"Check-out Airbnb + Último desayuno", desc:"Cerrar maletas, tomar los últimos momentos de brisa caribeña. Desayuno final dominicano — mangú, jugos tropicales, café Santo Domingo. El sabor del Caribe una última vez.", cost:"~$30", hrs:"1h", warn:"⏰ SALIR DEL AIRBNB MÁXIMO A LAS 8:00 AM SIN EXCEPCIÓN.\n⛽ Llenar el tanque del carro antes del aeropuerto.", emma:true},
+      {id:"i1", time:"8:00 am", name:"Drive al aeropuerto SDQ · Las Américas", desc:"~20-30 minutos del Airbnb. Devolver el carro con el tanque lleno. Hacer check-in, migración y duty free. Ron Barceló Imperial y Brugal Leyenda son los mejores souvenirs líquidos.", cost:"", hrs:"", warn:"✈️ Vuelo 11:00 AM · Terminal B internacional.\n🕐 Llegar 2.5h antes como mínimo.", emma:true},
+      {id:"i2", time:"11:00 am", name:"Vuelo de regreso a México ✈️", desc:"De regreso a casa cargados de memorias épicas. Emma con historias para contar en el colegio por semanas. El equipo más aventurero del Caribe.", cost:"✅ Pagado", hrs:"~3h vuelo", booked:true, emma:true},
+    ]
+  },
+];
+
+const RESERVATIONS = [
+  {id:"r0", item:"✈️ Vuelos ida y vuelta", done:true},
+  {id:"r1", item:"🛥️ Tour Isla Saona", done:true},
+  {id:"r2", item:"🏎️ Tour Buggies VIP Privado", note:"🌐 puntacanagroups.com · Pedir tour PRIVADO"},
+  {id:"r3", item:"🏨 Airbnb Punta Cana · 3 noches", note:"Noches: 20, 21, 22 Marzo"},
+  {id:"r4", item:"🏠 Sea Mare Las Terrenas · 3 noches", note:"Calle 17 de Febrero · Noches: 24, 25, 26 Marzo"},
+  {id:"r5", item:"🏨 Day Pass Bahia Principe El Portillo", note:"📧 gerenterecepcionbppor@bahia-principe.com · Tel 809-240-6100"},
+  {id:"r6", item:"🛳️ Tour Frontón + Madama (Las Galeras)", note:"Reservar en Las Galeras o GetYourGuide · playafronton.com"},
+  {id:"r7", item:"🏠 Airbnb Santo Domingo · 1 noche", note:"Calle María Trinidad Sánchez · Noche: 27 Marzo"},
+  {id:"r8", item:"🚗 Carro rental aeropuerto SDQ", note:"Verificar altura para caminos de tierra · tanque lleno al devolver"},
+];
+
+const PACKING = {
+  "📄 Documentos":["Pasaportes x4","Licencias de conducir","Reserva Isla Saona (impresa/digital)","Seguros de viaje","Datos de hoteles impresos"],
+  "👗 Ropa":["Trajes de baño x3 mínimo c/u","Ropa ligera (~30°C)","Tenis o zapatos de agua","Sandalias cómodas","Ropa extra para Emma","Pañuelo o bandana (buggies)"],
+  "💊 Salud":["Bloqueador reef-safe x4","Repelente ecológico","Botiquín básico","Medicamentos personales"],
+  "🏖️ Playa":["Escarpines x4 (Frontón/erizos)","Snorkel propio si tienen","GoPro o cámara waterproof","Toallas de microfibra x4"],
+  "📱 Tech":["Power banks x2","Cables y adaptadores","Auriculares"],
+  "💰 Misc":["Efectivo USD ($600+ mínimo)","Mochila pequeña excursiones","Snacks para Emma","Bolsas ziplock para playa"],
+};
+
+const BUDGET_ITEMS = [
+  {label:"Vuelos ida y vuelta", day:"Todos", amt:0, note:"✅ ya pagado"},
+  {label:"Isla Saona", day:"D21", amt:0, note:"✅ ya pagado"},
+  {label:"Airbnb Punta Cana (3n)", day:"D20-23", amt:450},
+  {label:"Comidas Punta Cana (4 días)", day:"D20-23", amt:380},
+  {label:"Buggies VIP Privado (4p)", day:"D23", amt:400},
+  {label:"Gasolina zona Miches", day:"D22", amt:60},
+  {label:"Salto de Socoa + compra súper", day:"D24", amt:140},
+  {label:"Sea Mare Las Terrenas (3n)", day:"D24-26", amt:450},
+  {label:"Comidas Las Terrenas", day:"D24-26", amt:280},
+  {label:"Tour Frontón + Madama (4p)", day:"D25", amt:140},
+  {label:"Day Pass Bahia Principe (4+Emma)", day:"D26", amt:360},
+  {label:"Airbnb Santo Domingo (1n)", day:"D27", amt:120},
+  {label:"Zona Colonial + compras SD", day:"D27", amt:220},
+  {label:"Gasolina ruta completa", day:"Todos", amt:230},
+  {label:"Extras / imprevistos", day:"Varios", amt:350},
+];
+
+const CONTACTS = [
+  {name:"⛰️ Montaña Redonda", num:"+1 809-481-0712", tag:"Tour"},
+  {name:"🏎️ Buggies Macao", num:"+1 829-946-3500", tag:"Tour"},
+  {name:"🏨 Day Pass El Portillo", num:"+1 809-240-6100", tag:"Resort"},
+  {name:"🤿 Scubaquatic Las Galeras", num:"+1 809-538-0007", tag:"Tour"},
+  {name:"👮 Policía Turística RD", num:"+1 809-686-8639", tag:"Seguridad"},
+  {name:"🏥 Centro Médico PC", num:"+1 809-686-1601", tag:"Salud"},
+  {name:"🚦 DIGESETT (tránsito)", num:"+1 809-533-8888", tag:"Vialidad"},
+  {name:"🚗 DIGESETT emergencia vial", num:"+1 809-682-3666", tag:"Vialidad"},
+];
+
+let activeTab="home", activeDayIdx=0, expandedAct=null;
+let done={}, packed={}, reserved={r0:true,r1:true};
+const allActs=DAYS.flatMap(d=>d.activities);
+const packKeys=Object.entries(PACKING).flatMap(([c,items])=>items.map(i=>`${c}::${i}`));
+const maxBudget=Math.max(...BUDGET_ITEMS.filter(b=>b.amt>0).map(b=>b.amt));
+
+function updateCountdown(){
+  const diff=TRIP_START-new Date();
+  if(diff<=0){document.getElementById("countdown").innerHTML='<div style="font-size:26px;font-weight:800;color:#00D4AA">🎉 ¡YA ESTÁN EN RD!</div>';return;}
+  const d=Math.floor(diff/86400000),h=Math.floor((diff%86400000)/3600000),m=Math.floor((diff%3600000)/60000),s=Math.floor((diff%60000)/1000);
+  document.getElementById("cd-d").textContent=String(d).padStart(2,"0");
+  document.getElementById("cd-h").textContent=String(h).padStart(2,"0");
+  document.getElementById("cd-m").textContent=String(m).padStart(2,"0");
+  document.getElementById("cd-s").textContent=String(s).padStart(2,"0");
+}
+setInterval(updateCountdown,1000);
+updateCountdown();
+
+function switchTab(id,btn){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+  document.getElementById("page-"+id).classList.add("active");
+  btn.classList.add("active");
+  activeTab=id;
+  if(id==="days")renderDayContent();
+}
+
+function initDayScroll(){
+  const sc=document.getElementById("day-scroll");
+  sc.innerHTML="";
+  DAYS.forEach((d,i)=>{
+    const btn=document.createElement("button");
+    btn.className="day-btn"+(i===activeDayIdx?" active-day":"");
+    if(i===activeDayIdx)btn.style.background=d.color;
+    btn.textContent=d.icon+" "+d.label;
+    btn.onclick=()=>{activeDayIdx=i;expandedAct=null;initDayScroll();renderDayContent();};
+    sc.appendChild(btn);
+  });
+}
+
+function renderDayContent(){
+  initDayScroll();
+  const d=DAYS[activeDayIdx];
+  const doneCount=d.activities.filter(a=>done[a.id]).length;
+  const pct=Math.round((doneCount/d.activities.length)*100);
+  let html=`<div style="background:linear-gradient(135deg,${d.color}18,${d.color}08);border-radius:18px;padding:20px;border:1px solid ${d.color}35;margin-bottom:16px">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px">
+      <div style="font-size:36px">${d.icon}</div>
+      <div>
+        <div style="font-size:10px;color:${d.color};letter-spacing:2.5px;text-transform:uppercase;font-weight:700">${d.label}</div>
+        <div style="font-size:18px;font-weight:800;color:#E8EDF5;margin-top:2px;line-height:1.2">${d.title}</div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:#4B6080;margin-bottom:12px">📍 ${d.loc} ${d.reserved?'<span class="pill" style="background:rgba(0,212,170,0.15);color:#00D4AA">✅ Reservado</span>':""}</div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+      <span style="font-size:11px;color:#4B6080">Progreso del día</span>
+      <span style="font-size:11px;font-weight:700;color:${d.color}">${doneCount}/${d.activities.length}</span>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" style="background:${d.color};width:${pct}%"></div></div>
+  </div>`;
+
+  d.activities.forEach(act=>{
+    const isDone=!!done[act.id],isExp=expandedAct===act.id;
+    html+=`<div class="act-card${isDone?" done":""}" id="act-${act.id}">
+      <div class="act-top">
+        <div class="check-circle${isDone?" checked":""}" onclick="toggleDone('${act.id}');event.stopPropagation()"><span class="check-mark">✓</span></div>
+        <div class="act-body" onclick="toggleExp('${act.id}')">
+          <div class="act-badges">
+            <span class="act-time" style="color:${d.color}">${act.time}</span>
+            ${act.booked?'<span class="pill" style="background:rgba(0,212,170,0.15);color:#00D4AA">✅ Pagado</span>':""}
+            ${act.emma?'<span class="pill" style="background:rgba(245,158,11,0.15);color:#F59E0B">👧 Emma ok</span>':""}
+          </div>
+          <div class="act-title">${act.name}</div>
+          ${act.cost?`<div class="act-cost">💵 ${act.cost}${act.hrs?" · ⏱ "+act.hrs:""}</div>`:""}
+        </div>
+        <div class="chevron" onclick="toggleExp('${act.id}')">${isExp?"▲":"▼"}</div>
+      </div>
+      ${isExp?`<div class="act-detail" style="display:block">
+        <p class="act-desc">${act.desc}</p>
+        ${act.warn?`<div class="warn-box">${act.warn.replace(/\n/g,"<br>")}</div>`:""}
+        <div class="act-links">
+          ${act.phone?`<a href="tel:${act.phone}" class="link-btn link-tel">📞 ${act.phone}</a>`:""}
+          ${act.link?`<a href="${act.link}" target="_blank" class="link-btn link-web">🌐 Sitio web</a>`:""}
+        </div>
+      </div>`:""}
+    </div>`;
+  });
+
+  if(d.suggestions&&d.suggestions.length){
+    html+=`<div style="margin-top:16px">
+      <div style="font-size:11px;color:#F59E0B;letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:10px">💡 Sugerencias · ${d.zone}</div>
+      <div class="sugg-box">
+        <div class="sugg-title">📌 Por si algo surge</div>
+        ${d.suggestions.map(s=>`<div class="sugg-item"><b>${s.name}</b> — ${s.note}</div>`).join("")}
+      </div>
+    </div>`;
+  }
+
+  document.getElementById("day-content").innerHTML=html;
+}
+
+function toggleExp(id){expandedAct=expandedAct===id?null:id;renderDayContent();}
+function toggleDone(id){done[id]=!done[id];renderDayContent();updateStats();}
+
+function renderReservations(){
+  const total=RESERVATIONS.length,count=RESERVATIONS.filter(r=>!!reserved[r.id]).length;
+  document.getElementById("res-count").textContent=`${count}/${total}`;
+  document.getElementById("res-bar").style.width=`${(count/total)*100}%`;
+  let html="";
+  RESERVATIONS.forEach(r=>{
+    const isRes=!!reserved[r.id];
+    html+=`<div class="check-item${isRes?" checked":""}" onclick="toggleRes('${r.id}')">
+      <div class="check-sq${isRes?" checked":""}"><span class="sq-mark">✓</span></div>
+      <div><div class="check-lbl">${r.item}</div>${r.note?`<div class="check-note">${r.note}</div>`:""}</div>
+    </div>`;
+  });
+  document.getElementById("res-list").innerHTML=html;
+}
+function toggleRes(id){reserved[id]=!reserved[id];renderReservations();}
+
+function renderPacking(){
+  const total=packKeys.length,count=packKeys.filter(k=>!!packed[k]).length;
+  document.getElementById("pack-count").textContent=`${count}/${total}`;
+  document.getElementById("pack-bar").style.width=`${(count/total)*100}%`;
+  let html="";
+  Object.entries(PACKING).forEach(([cat,items])=>{
+    html+=`<div class="pack-cat">${cat}</div>`;
+    items.forEach(item=>{
+      const k=`${cat}::${item}`,isp=!!packed[k];
+      html+=`<div class="pack-item${isp?" checked":""}" onclick="togglePack('${k.replace(/'/g,"\\'")}')">
+        <div class="check-sq${isp?" checked":""}"><span class="sq-mark">✓</span></div>
+        <span class="pack-lbl">${item}</span>
+      </div>`;
+    });
+  });
+  document.getElementById("pack-list").innerHTML=html;
+}
+function togglePack(k){packed[k]=!packed[k];renderPacking();updateStats();}
+
+function renderBudget(){
+  const colors=["#00D4AA","#3B8BEB","#F59E0B","#EF4444","#10B981","#8B5CF6","#F97316","#EC4899","#6366F1","#06B6D4","#84CC16","#F43F5E","#A855F7","#14B8A6","#F59E0B"];
+  let html="";
+  BUDGET_ITEMS.forEach((b,i)=>{
+    const isPaid=b.amt===0;
+    html+=`<div class="budget-item">
+      <div class="b-row">
+        <div><div class="b-name">${b.label}</div><div class="b-day">${b.day}${b.note?" · "+b.note:""}</div></div>
+        <div class="b-amt${isPaid?" paid":""}">${isPaid?"✅ Pagado":"$"+b.amt}</div>
+      </div>
+      ${!isPaid?`<div class="prog-bar"><div class="prog-fill" style="background:${colors[i%colors.length]};width:${(b.amt/maxBudget)*100}%"></div></div>`:""}
+    </div>`;
+  });
+  document.getElementById("budget-list").innerHTML=html;
+}
+
+const TAG_BG={Tour:"rgba(0,212,170,0.15)",Resort:"rgba(59,130,246,0.15)",Seguridad:"rgba(239,68,68,0.15)",Salud:"rgba(59,130,246,0.15)",Vialidad:"rgba(245,158,11,0.15)"};
+const TAG_COL={Tour:"#00D4AA",Resort:"#93C5FD",Seguridad:"#FCA5A5",Salud:"#93C5FD",Vialidad:"#FDE68A"};
+
+function renderContacts(){
+  let html="";
+  CONTACTS.forEach(c=>{
+    html+=`<a href="tel:${c.num}" class="contact-item">
+      <div><div class="c-name">${c.name}</div><div class="c-num">${c.num}</div></div>
+      <div class="c-right">
+        <span class="pill" style="background:${TAG_BG[c.tag]};color:${TAG_COL[c.tag]}">${c.tag}</span>
+        <div class="c-call">📞</div>
+      </div>
+    </a>`;
+  });
+  document.getElementById("contacts-list").innerHTML=html;
+}
+
+function updateStats(){
+  const doneCount=allActs.filter(a=>done[a.id]).length;
+  const packedCount=packKeys.filter(k=>packed[k]).length;
+  const pct=Math.round((doneCount/allActs.length)*100);
+  document.getElementById("stat-acts").textContent=`${doneCount}/${allActs.length}`;
+  document.getElementById("stat-pack").textContent=`${packedCount}/${packKeys.length}`;
+  document.getElementById("prog-pct").textContent=`${pct}%`;
+  document.getElementById("prog-fill").style.width=`${pct}%`;
+}
+
+initDayScroll();
+renderReservations();
+renderPacking();
+renderBudget();
+renderContacts();
+updateStats();
+</script>
+</body>
+</html>
